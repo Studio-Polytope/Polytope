@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from .Token import Token
 
 
-class Method(str, Enum):
+class RequestMethod(str, Enum):
     """! HTTP methods enumeration class."""
 
     @staticmethod
@@ -57,7 +57,7 @@ class Requester:
 
     def request(
         self,
-        method: Method,
+        method: RequestMethod,
         api_url: str,
         *args,
     ) -> requests.Response:
@@ -71,12 +71,12 @@ class Requester:
         """
 
         assert method in [
-            Method.GET,
-            Method.HEAD,
-            Method.POST,
-            Method.PUT,
-            Method.DELETE,
-            Method.PATCH,
+            RequestMethod.GET,
+            RequestMethod.HEAD,
+            RequestMethod.POST,
+            RequestMethod.PUT,
+            RequestMethod.DELETE,
+            RequestMethod.PATCH,
         ]
         assert 0 < len(api_url)
 
