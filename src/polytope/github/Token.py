@@ -1,15 +1,17 @@
 
 
-class Token():
-    """
-    Personal Access Token
-    """
+class Token:
+    """! Personal access token class."""
 
     def __init__(self, token: str):
-        assert isinstance(token, str)
+        """! Token class initializer.
+
+        @param token    A personal access token string.
+        """
+
         assert 0 < len(token)
 
-        self._token = token
+        self._token: str = token
 
     @property
     def token(self) -> str:
