@@ -15,4 +15,4 @@ class Token:
 
     @property
     def token(self) -> str:
-        return self._token
+        return 'Bearer ' + self._token

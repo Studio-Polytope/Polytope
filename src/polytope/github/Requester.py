@@ -53,7 +53,7 @@ class Requester:
         self._base_url: str = base_url
 
         self._session: requests.Session = requests.Session()
-        self._session.headers['Authorization'] = 'token %s' % self._token
+        self._session.headers['Authorization'] = self._token.token
 
     def request(
         self,
