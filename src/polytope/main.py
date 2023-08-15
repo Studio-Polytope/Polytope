@@ -13,4 +13,3 @@ def load_environment():
 
 if __name__ == "__main__":
     load_environment()
-    print(GITHUB_TOKEN)
