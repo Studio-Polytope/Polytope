@@ -3,6 +3,7 @@ from enum import Enum, auto
 
 import requests
 
+"""This clause is only processed by mypy."""
 if TYPE_CHECKING:
     from .Token import Token
 
