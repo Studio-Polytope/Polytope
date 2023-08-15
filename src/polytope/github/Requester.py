@@ -65,13 +65,14 @@ class Requester:
         """! API request wrapper with token authorization.
 
         @param method   A HTTPS method.
-        @param api_url  A relative URL of API.
+        @param api_url  A relative URL of API starting with '/'.
         @param **kwargs Additional arguments for requesting.
 
         @return  A response.
         """
 
         assert 0 < len(api_url)
+        assert '/' == api_url[0]
 
         url: str = self._base_url + api_url
         return self._actual_request(method, url, **kwargs)
