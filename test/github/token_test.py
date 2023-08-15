@@ -13,15 +13,15 @@ def test_int_token():
         Token(token=3)
 
 
-def test_length_one_token():
-    token = Token('A')
-    assert 'A' == token.token
-
-
 def test_valid_token():
     key = 'eyJpc3MiOiJ2ZWxvcGVydC5jb20iLCJleHAiOiIxNDg1MjcwMDA'
     token = Token(token=key)
-    assert key == token.token
+    assert ('Bearer %s' % key) == token.token
+
+
+def test_length_one_token():
+    token = Token('A')
+    assert 'A' == token.token.split()[-1]
 
 
 def test_token_readonly():
