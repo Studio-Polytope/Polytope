@@ -1,6 +1,6 @@
 import pytest
 
-from polytope.github import Token, RequestMethod, Requester
+from polytope.github import Token, RequestVerb, Requester
 from polytope.github.Requester import MockSession
 
 
@@ -16,13 +16,13 @@ def test_invalid_api_url():
     requester = Requester(token, 'https://api.github.com')
 
     with pytest.raises(AssertionError):
-        requester.request(RequestMethod.GET, 'user')
+        requester.request(RequestVerb.GET, 'user')
 
 
 def test_get_user_method():
     token = Token('token-key-value')
     requester = Requester(token, 'https://api.github.com', MockSession)
-    requester.request(RequestMethod.GET, '/user')
+    requester.request(RequestVerb.GET, '/user')
 
     session: MockSession = requester.session
 
@@ -30,4 +30,4 @@ def test_get_user_method():
 
     log_entry = session.logs[0]
     assert 'https://api.github.com/user' == log_entry.url
-    assert RequestMethod.GET == log_entry.method
+    assert RequestVerb.GET == log_entry.verb

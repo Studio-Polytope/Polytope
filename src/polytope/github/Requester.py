@@ -10,8 +10,8 @@ if TYPE_CHECKING:
     from .Token import Token
 
 
-class RequestMethod(str, Enum):
-    """! HTTP methods enumeration class."""
+class RequestVerb(str, Enum):
+    """! HTTP verbs enumeration class."""
 
     @staticmethod
     def _generate_next_value_(
@@ -42,7 +42,7 @@ class Session(ABC):
     @abstractmethod
     def request(
         self,
-        method: RequestMethod,
+        verb: RequestVerb,
         url: str,
         **kwargs,
     ) -> requests.Response:
@@ -50,7 +50,7 @@ class Session(ABC):
 
         This method might be wrapped or injected.
 
-        @param method   A HTTPS method.
+        @param verb     A HTTPS verb.
         @param url      A full-path URL.
         @param **kwargs Additional arguments for requesting.
 
@@ -78,7 +78,7 @@ class RequestsSession(Session):
 
     def request(
         self,
-        method: RequestMethod,
+        verb: RequestVerb,
         url: str,
         **kwargs,
     ) -> requests.Response:
@@ -86,23 +86,23 @@ class RequestsSession(Session):
 
         This method might be wrapped or injected.
 
-        @param method   A HTTPS method.
+        @param verb     A HTTPS verb.
         @param url      A full-path URL.
         @param **kwargs Additional arguments for requesting.
 
         @return  A response.
         """
 
-        assert method in [
-            RequestMethod.GET,
-            RequestMethod.HEAD,
-            RequestMethod.POST,
-            RequestMethod.PUT,
-            RequestMethod.DELETE,
-            RequestMethod.PATCH,
+        assert verb in [
+            RequestVerb.GET,
+            RequestVerb.HEAD,
+            RequestVerb.POST,
+            RequestVerb.PUT,
+            RequestVerb.DELETE,
+            RequestVerb.PATCH,
         ]
 
-        request_method: Callable[..., requests.Response] = getattr(self._session, method.lower())
+        request_method: Callable[..., requests.Response] = getattr(self._session, verb.lower())
         return request_method(url, **kwargs)
 
     @property
@@ -139,23 +139,23 @@ class MockSession(Session):
 
     def request(
         self,
-        method: RequestMethod,
+        verb: RequestVerb,
         url: str,
         **kwargs,
     ) -> requests.Response:
         """! Request using injected method.
 
-        @param method   A HTTPS method.
+        @param verb     A HTTPS verb.
         @param url      A full-path URL.
         @param **kwargs Additional arguments for requesting.
 
         @return  A response.
         """
 
-        log_entry = self.LogEntry(method, url, result=None, **kwargs)
+        log_entry = self.LogEntry(verb, url, result=None, **kwargs)
         self._logs.append(log_entry)
 
-        response = self._inject_method(method, url, **kwargs)
+        response = self._inject_method(verb, url, **kwargs)
         log_entry.result = response
         return response
 
@@ -167,7 +167,7 @@ class MockSession(Session):
 
         def __call__(
             self,
-            method: RequestMethod,
+            verb: RequestVerb,
             url: str,
             **kwargs,
         ) -> requests.Response:
@@ -178,27 +178,27 @@ class MockSession(Session):
 
         def __init__(
             self,
-            method: RequestMethod,
+            verb: RequestVerb,
             url: str,
             result: Optional[requests.Response],
             **kwargs,
         ):
             """! LogEntry class initializer.
 
-            @param method   A HTTPS method.
+            @param verb     A HTTPS verb.
             @param url      A full-path URL.
             @param result   A response result.
             @param **kwargs Additional arguments for requesting.
             """
 
-            self.method = method
+            self.verb = verb
             self.url = url
             self.result = result
             self.kwargs = kwargs
 
         def __repr__(self):
             return (
-                f"method = {self.method}, "
+                f"verb = {self.verb}, "
                 f"url = '{self.url}', "
                 f"kwargs = {self.kwargs}, "
                 f"result = {self.result}"
@@ -243,13 +243,13 @@ class Requester:
 
     def request(
         self,
-        method: RequestMethod,
+        verb: RequestVerb,
         api_url: str,
         **kwargs,
     ) -> requests.Response:
         """! API request wrapper with token authorization.
 
-        @param method   A HTTPS method.
+        @param verb     A HTTPS verb.
         @param api_url  A relative URL of API starting with '/'.
         @param **kwargs Additional arguments for requesting.
 
@@ -260,7 +260,7 @@ class Requester:
         assert '/' == api_url[0]
 
         url: str = self._base_url + api_url
-        return self._session.request(method, url, **kwargs)
+        return self._session.request(verb, url, **kwargs)
 
     @property
     def session(self):

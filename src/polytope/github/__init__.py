@@ -1,8 +1,8 @@
 __all__ = [
     "Token",
-    "RequestMethod",
+    "RequestVerb",
     "Requester",
 ]
 
 from .Token import Token
-from .Requester import RequestMethod, Requester
+from .Requester import RequestVerb, Requester
