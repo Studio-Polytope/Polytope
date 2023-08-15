@@ -1,7 +1,9 @@
-from typing import TYPE_CHECKING, Any, Optional, List, Callable, Protocol
+from typing import TYPE_CHECKING, Type, Any, Optional, List, Callable, Protocol
 from enum import Enum, auto
+from abc import ABC, abstractmethod, abstractproperty
 
 import requests
+from requests.structures import CaseInsensitiveDict
 
 """This clause is only processed by mypy."""
 if TYPE_CHECKING:
@@ -34,50 +36,47 @@ class RequestMethod(str, Enum):
     PATCH = auto()
 
 
-class Requester:
-    """! API request wrapper class."""
+class Session(ABC):
+    """! A request session class."""
 
-    def __init__(
-        self,
-        token: "Token",
-        base_url: str,
-    ):
-        """! Requester class initializer.
-
-        @param token    A token for authorization.
-        @param base_url A base URL of API.
-        """
-
-        assert 0 < len(base_url)
-
-        self._token: "Token" = token
-        self._base_url: str = base_url
-
-        self._session: requests.Session = requests.Session()
-        self._session.headers['Authorization'] = self._token.token
-
+    @abstractmethod
     def request(
         self,
         method: RequestMethod,
-        api_url: str,
+        url: str,
         **kwargs,
     ) -> requests.Response:
-        """! API request wrapper with token authorization.
+        """! Request method with token authorization.
+
+        This method might be wrapped or injected.
 
         @param method   A HTTPS method.
-        @param api_url  A relative URL of API starting with '/'.
+        @param url      A full-path URL.
         @param **kwargs Additional arguments for requesting.
 
         @return  A response.
         """
+        ...
 
-        assert 0 < len(api_url)
-        assert '/' == api_url[0]
+    @abstractproperty
+    def headers(self):
+        ...
 
-        url: str = self._base_url + api_url
-        return self._actual_request(method, url, **kwargs)
+    @headers.setter
+    @abstractmethod
+    def headers(self, value):
+        ...
 
-    def _actual_request(
+
+class RequestsSession(Session):
+    """! A session class with requests session."""
+
+    def __init__(self):
+        """! RequestsSession class initializer."""
+
+        self._session: requests.Session = requests.Session()
+
+    def request(
         self,
         method: RequestMethod,
         url: str,
@@ -106,51 +105,45 @@ class Requester:
         request_method: Callable[..., requests.Response] = getattr(self._session, method.lower())
         return request_method(url, **kwargs)
 
+    @property
+    def headers(self):
+        return self._session.headers
 
-class RequestMethodCallable(Protocol):
-    """! A protocol for request method injection."""
+    @headers.setter
+    def headers(self, value):
+        self._session.headers = value
 
-    def __call__(
+
+class MockSession(Session):
+    """! A mock session class for testing."""
+
+    def __init__(self):
+        """! MockSession class initializer."""
+
+        self._logs: List[MockSession.LogEntry] = []
+        self._headers: CaseInsensitiveDict = CaseInsensitiveDict()
+        self.inject_request()
+
+    def inject_request(
         self,
-        method: RequestMethod,
-        url: str,
-        **kwargs,
-    ) -> requests.Response:
-        ...
-
-
-class RequesterDebugger(Requester):
-    """! A class for debugging Requester class."""
-
-    def __init__(
-        self,
-        token: "Token",
-        base_url: str,
-        inject_method: Optional[RequestMethodCallable] = None,
+        inject_method: Optional["MockSession.RequestMethodCallable"] = None,
     ):
-        """! Requester class initializer.
+        """! Inject a request method.
 
-        @param token            A token for authorization.
-        @param base_url         A base URL of API.
         @param inject_method    A request method to inject.
         """
 
-        super().__init__(token, base_url)
-
-        self._logs: List[RequesterDebugger.LogEntry] = []
-
         if inject_method is None:
-            inject_method = super()._actual_request
+            inject_method = self.__default_request
+        self._inject_method = inject_method
 
-        self._inject_method: RequestMethodCallable = inject_method
-
-    def _actual_request(
+    def request(
         self,
         method: RequestMethod,
         url: str,
         **kwargs,
     ) -> requests.Response:
-        """! Wrapped request method.
+        """! Request using injected method.
 
         @param method   A HTTPS method.
         @param url      A full-path URL.
@@ -164,8 +157,21 @@ class RequesterDebugger(Requester):
 
         response = self._inject_method(method, url, **kwargs)
         log_entry.result = response
-
         return response
+
+    def __default_request(self, *args, **kwargs) -> requests.Response:
+        return requests.Response()
+
+    class RequestMethodCallable(Protocol):
+        """! A protocol for request method injection."""
+
+        def __call__(
+            self,
+            method: RequestMethod,
+            url: str,
+            **kwargs,
+        ) -> requests.Response:
+            ...
 
     class LogEntry:
         """! Logging entry class."""
@@ -199,13 +205,63 @@ class RequesterDebugger(Requester):
             )
 
     @property
-    def session(self):
-        return self._session
+    def headers(self):
+        return self._headers
 
-    @session.setter
-    def session(self, value):
-        self._session = value
+    @headers.setter
+    def headers(self, value):
+        self._headers = value
 
     @property
     def logs(self):
         return self._logs
+
+
+class Requester:
+    """! API request wrapper class."""
+
+    def __init__(
+        self,
+        token: "Token",
+        base_url: str,
+        SessionClass: Type[Session] = RequestsSession,
+    ):
+        """! Requester class initializer.
+
+        @param token            A token for authorization.
+        @param base_url         A base URL of API.
+        @param SessionClass     A class to use for a session.
+        """
+
+        assert 0 < len(base_url)
+
+        self._token: "Token" = token
+        self._base_url: str = base_url
+
+        self._session: Session = SessionClass()
+        self._session.headers['Authorization'] = self._token.token
+
+    def request(
+        self,
+        method: RequestMethod,
+        api_url: str,
+        **kwargs,
+    ) -> requests.Response:
+        """! API request wrapper with token authorization.
+
+        @param method   A HTTPS method.
+        @param api_url  A relative URL of API starting with '/'.
+        @param **kwargs Additional arguments for requesting.
+
+        @return  A response.
+        """
+
+        assert 0 < len(api_url)
+        assert '/' == api_url[0]
+
+        url: str = self._base_url + api_url
+        return self._session.request(method, url, **kwargs)
+
+    @property
+    def session(self):
+        return self._session
