@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Type, Any, Optional, List, Callable, Protocol
+from typing import TYPE_CHECKING, Type, Any, Optional, List, Callable, Protocol, Dict
 from enum import Enum, auto
 from abc import ABC, abstractmethod, abstractproperty
 
@@ -101,6 +101,8 @@ class RequestsSession(Session):
             RequestVerb.DELETE,
             RequestVerb.PATCH,
         ]
+
+        print(url, kwargs)
 
         request_method: Callable[..., requests.Response] = getattr(self._session, verb.lower())
         return request_method(url, **kwargs)
@@ -225,12 +227,14 @@ class Requester:
         token: "Token",
         base_url: str,
         SessionClass: Type[Session] = RequestsSession,
+        headers: Optional[Dict[str, str]] = None,
     ):
         """! Requester class initializer.
 
         @param token            A token for authorization.
         @param base_url         A base URL of API.
         @param SessionClass     A class to use for a session.
+        @param headers          Additional headers other than Authorization to fix in session.
         """
 
         assert 0 < len(base_url)
@@ -240,6 +244,12 @@ class Requester:
 
         self._session: Session = SessionClass()
         self._session.headers['Authorization'] = self._token.token
+
+        if headers:
+            for k, v in headers.items():
+                if k.lower() == 'authorization':
+                    continue
+                self._session.headers[k] = v
 
     def request(
         self,
