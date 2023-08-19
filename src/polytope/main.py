@@ -1,6 +1,8 @@
 import os
 from dotenv import load_dotenv
 
+from polytope.github.repository.RepositoryConfig import GithubRepositoryConfig
+
 GITHUB_TOKEN: str = ''
 
 
@@ -14,7 +16,7 @@ def load_environment():
 if __name__ == "__main__":
     load_environment()
 
-    from polytope.github.repository import GithubRepository, GithubRepositoryConfig
+    from polytope.github.repository import GithubRepository
     from polytope.github.Token import Token
 
     ghr = GithubRepository(

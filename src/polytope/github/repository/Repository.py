@@ -1,64 +1,27 @@
 from polytope.github import Requester, RequestVerb
 from polytope.github.Requester import Session, RequestsSession
 from typing import TYPE_CHECKING, Optional
-from dataclasses import dataclass, asdict
+from dataclasses import asdict
+import requests
 import json
+from enum import Enum, auto
+from polytope.github.repository import (
+    GithubRepositoryResponse,
+    GithubRepositoryConfig,
+    GithubRepositoryInternalCode as GHIC
+)
 
 # only for mypy.
 if TYPE_CHECKING:
     from polytope.github import Token
 
 
-@dataclass
-class GithubRepositoryConfig:
-    name: str
-    description: str = ""
-    homepage: str = ""
-    private: bool = True
-    has_issues: bool = True
-    has_projects: bool = True
-    has_wiki: bool = True
-    has_discussions: bool = True
-    auto_init: bool = False
-    gitignore_template: str = ""
-    license_template: str = ""
-    allow_squash_merge: bool = True
-    allow_merge_commit: bool = True
-    allow_rebase_merge: bool = True
-    allow_auto_merge: bool = False
-    delete_branch_on_merge: bool = False
-    squash_merge_commit_title: str = "PR_TITLE"
-    squash_merge_commit_message: str = "COMMIT_MESSAGES"
-    merge_commit_title: str = "PR_TITLE"
-    merge_commit_message: str = "PR_BODY"
-    has_downloads: bool = True
-    is_template: bool = False
 
-    def validate(self) -> bool:
-        # TODO : adopt github's own validation rules in advance
-        if len(self.name) == 0:
-            return False
-        
-        # validate squash commit combo
-        squash_commit_combo = (self.squash_merge_commit_title, self.squash_merge_commit_message)
-        if squash_commit_combo not in (
-            ("PR_TITLE", "PR_BODY"),
-            ("PR_TITLE", "BLANK"),
-            ("PR_TITLE", "COMMIT_MESSAGES"),
-            ("COMMIT_OR_PR_TITLE", "COMMIT_MESSAGES"),
-        ):
-            print(squash_commit_combo, "is not valid")
-            return False
 
-        return True
-        return len(self.name) > 0
 
-"""
-Controller of Github Repository.
-"""
 class GithubRepository:
     """
-    Initializer of Github Repository.
+    Controller of Github Repository.
     @param token: Personal Access Token.
     @param owner: Github Username of Repository Owner.
     @param name: Name of the repository.
@@ -86,7 +49,7 @@ class GithubRepository:
     def create(
             self,
             config: Optional[GithubRepositoryConfig] = None
-        ):
+        ) -> GithubRepositoryResponse:
         """
         Creates a github repository.
         Wraps [REST API for Github Repository](https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#create-a-repository-for-the-authenticated-user)
@@ -96,15 +59,23 @@ class GithubRepository:
         if config and config.validate():
             # For safety, we forbid changing name in create stage.
             if self.config.name != config.name:
-                # TODO clarify error
-                return None
+                return GithubRepositoryResponse(
+                    status_code=None,
+                    internal_code=GHIC.ForbiddenNameChangeOnCreation,
+                    error_msg="cannot modify name on creation step",
+                    errors=""
+                )
             
             self.config = config
 
-        if not self.config.validate():
-            print("Die")
-            # TODO clarify error
-            return None
+        valid_config, validation_msg = self.config.validate()
+        if not valid_config:
+            return GithubRepositoryResponse(
+                status_code=None,
+                internal_code=GHIC.ConfigValidationFailed,
+                error_msg=f'config validation failed while creation: "{validation_msg}"',
+                errors=""
+            )
         
         data = asdict(self.config)
 
@@ -114,8 +85,14 @@ class GithubRepository:
             data=json.dumps(data)
         )
 
-        # TODO: refine return structure
-        return result
+        # TODO post validation
+
+        return GithubRepositoryResponse(
+            status_code=result.status_code,
+            internal_code=GHIC.Success,
+            error_msg="",
+            errors=""
+        )
     
     def get(self):
         """
@@ -127,7 +104,14 @@ class GithubRepository:
             api_url=api_url
         )
 
-        return result
+        # TODO post validation
+
+        return GithubRepositoryResponse(
+            status_code=result.status_code,
+            internal_code=GHIC.Success,
+            error_msg="",
+            errors=""
+        )
     
     def update(
             self,
@@ -150,7 +134,14 @@ class GithubRepository:
             data=json.dumps(data)
         )
 
-        return result
+        # TODO post validation
+
+        return GithubRepositoryResponse(
+            status_code=result.status_code,
+            internal_code=GHIC.Success,
+            error_msg="",
+            errors=""
+        )
     
     def delete(self):
         """
@@ -163,4 +154,11 @@ class GithubRepository:
             api_url=api_url
         )
 
-        return result
+        # TODO post validation
+
+        return GithubRepositoryResponse(
+            status_code=result.status_code,
+            internal_code=GHIC.Success,
+            error_msg="",
+            errors=""
+        )
