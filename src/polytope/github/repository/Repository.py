@@ -18,6 +18,9 @@ if TYPE_CHECKING:
 
 
 def fetch_message_and_errors(result: requests.Response) -> Tuple[str, str]:
+    """
+    post-processor of erroneous request.Response.
+    """
     dic = json.loads(result.content)
 
     if "message" in dic.keys() and "errors" in dic.keys():
@@ -99,7 +102,7 @@ class GithubRepository:
                     errors=errors
                 )
             else:
-                # Leave errors non-parsed
+                # Leave errors unparsed
                 return GithubRepositoryResponse(
                     status_code=result.status_code,
                     internal_code=GHIC.FailedToCreate,
@@ -146,14 +149,30 @@ class GithubRepository:
             data=json.dumps(data)
         )
 
-        # TODO post validation
-
-        return GithubRepositoryResponse(
-            status_code=result.status_code,
-            internal_code=GHIC.Success,
-            error_msg="",
-            errors=""
-        )
+        if result.status_code == 201:
+            return GithubRepositoryResponse(
+                status_code=result.status_code,
+                internal_code=GHIC.Success,
+                error_msg="",
+                errors=""
+            )
+        else:
+            msg, errors = fetch_message_and_errors(result)
+            if (msg, errors) != (None, None):
+                return GithubRepositoryResponse(
+                    status_code=result.status_code,
+                    internal_code=GHIC.FailedToCreateWithoutTemplate,
+                    error_msg=msg,
+                    errors=errors
+                )
+            else:
+                # Leave errors unparsed
+                return GithubRepositoryResponse(
+                    status_code=result.status_code,
+                    internal_code=GHIC.FailedToCreateWithoutTemplate,
+                    error_msg=bytes.decode(result.content),
+                    errors=""
+                )
     
     def get(self):
         """
@@ -165,14 +184,30 @@ class GithubRepository:
             api_url=api_url
         )
 
-        # TODO post validation
-
-        return GithubRepositoryResponse(
-            status_code=result.status_code,
-            internal_code=GHIC.Success,
-            error_msg="",
-            errors=""
-        )
+        if result.status_code == 200:
+            return GithubRepositoryResponse(
+                status_code=result.status_code,
+                internal_code=GHIC.Success,
+                error_msg="",
+                errors=""
+            )
+        else:
+            msg, errors = fetch_message_and_errors(result)
+            if (msg, errors) != (None, None):
+                return GithubRepositoryResponse(
+                    status_code=result.status_code,
+                    internal_code=GHIC.FailedToRead,
+                    error_msg=msg,
+                    errors=errors
+                )
+            else:
+                # Leave errors unparsed
+                return GithubRepositoryResponse(
+                    status_code=result.status_code,
+                    internal_code=GHIC.FailedToRead,
+                    error_msg=bytes.decode(result.content),
+                    errors=""
+                )    
     
     def update(
             self,
@@ -195,14 +230,31 @@ class GithubRepository:
             data=json.dumps(data)
         )
 
-        # TODO post validation
-
-        return GithubRepositoryResponse(
-            status_code=result.status_code,
-            internal_code=GHIC.Success,
-            error_msg="",
-            errors=""
-        )
+        # succeeded to update.
+        if result.status_code == 200:
+            return GithubRepositoryResponse(
+                status_code=result.status_code,
+                internal_code=GHIC.Success,
+                error_msg="",
+                errors=""
+            )
+        else:
+            msg, errors = fetch_message_and_errors(result)
+            if (msg, errors) != (None, None):
+                return GithubRepositoryResponse(
+                    status_code=result.status_code,
+                    internal_code=GHIC.FailedToUpdate,
+                    error_msg=msg,
+                    errors=errors
+                )
+            else:
+                # Leave errors unparsed
+                return GithubRepositoryResponse(
+                    status_code=result.status_code,
+                    internal_code=GHIC.FailedToUpdate,
+                    error_msg=bytes.decode(result.content),
+                    errors=""
+                )
     
     def delete(self):
         """
@@ -215,11 +267,28 @@ class GithubRepository:
             api_url=api_url
         )
 
-        # TODO post validation
-
-        return GithubRepositoryResponse(
-            status_code=result.status_code,
-            internal_code=GHIC.Success,
-            error_msg="",
-            errors=""
-        )
+        # succeeded to update.
+        if result.status_code == 204:
+            return GithubRepositoryResponse(
+                status_code=result.status_code,
+                internal_code=GHIC.Success,
+                error_msg="",
+                errors=""
+            )
+        else:
+            msg, errors = fetch_message_and_errors(result)
+            if (msg, errors) != (None, None):
+                return GithubRepositoryResponse(
+                    status_code=result.status_code,
+                    internal_code=GHIC.FailedToDelete,
+                    error_msg=msg,
+                    errors=errors
+                )
+            else:
+                # Leave errors unparsed
+                return GithubRepositoryResponse(
+                    status_code=result.status_code,
+                    internal_code=GHIC.FailedToDelete,
+                    error_msg=bytes.decode(result.content),
+                    errors=""
+                )
