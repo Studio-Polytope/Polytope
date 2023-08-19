@@ -9,7 +9,11 @@ class GithubRepositoryResponse:
     @field status_code: HTTP code.
     @field internal_code: internal exit code.
     """
+    # HTTP status code. None if failed before HTTP request.
     status_code: Optional[int]
+    # internal exit code.
     internal_code: GithubRepositoryInternalCode
+    # error msg from HTTP response.
     error_msg: str
+    # detailed errors.
     errors: str

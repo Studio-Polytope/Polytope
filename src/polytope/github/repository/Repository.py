@@ -219,7 +219,17 @@ class GithubRepository:
         @param config: GithubRepositoryConfig class. Includes name.
         """
 
+        has_polytope_config_file, reason = self.fetch_polytope_config_file()
+        if not has_polytope_config_file:
+            return GithubRepositoryResponse(
+                status_code=None,
+                internal_code=GHIC.UpdateWithoutPolytopeFile,
+                error_msg=reason,
+                errors=''
+            )
+        
         api_url = f'/repos/{self.owner}/{self.config.name}'
+
         if config and config.validate():
             self.config = config
 
@@ -262,7 +272,17 @@ class GithubRepository:
         Deletes repository.
         """
 
+        has_polytope_config_file, reason = self.fetch_polytope_config_file()
+        if not has_polytope_config_file:
+            return GithubRepositoryResponse(
+                status_code=None,
+                internal_code=GHIC.DeleteWithoutPolytopeFile,
+                error_msg=reason,
+                errors=''
+            )
+
         api_url = f'/repos/{self.owner}/{self.config.name}'
+
         result = self._requester.request(
             verb=RequestVerb.DELETE,
             api_url=api_url
