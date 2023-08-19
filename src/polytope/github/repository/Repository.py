@@ -1,22 +1,32 @@
-from polytope.github import Requester, RequestVerb
-from polytope.github.Requester import Session, RequestsSession
-from typing import TYPE_CHECKING, Optional
-from dataclasses import asdict
-import requests
 import json
+from dataclasses import asdict
 from enum import Enum, auto
-from polytope.github.repository import (
-    GithubRepositoryResponse,
-    GithubRepositoryConfig,
-    GithubRepositoryInternalCode as GHIC
-)
+from typing import TYPE_CHECKING, Optional, Tuple
+
+import requests
+
+from polytope.github import Requester, RequestVerb
+from polytope.github.Requester import RequestsSession, Session
+
+from .GithubRepositoryInternalCode import GithubRepositoryInternalCode as GHIC
+from .RepositoryConfig import GithubRepositoryConfig
+from .Response import GithubRepositoryResponse
 
 # only for mypy.
 if TYPE_CHECKING:
     from polytope.github import Token
 
 
+def fetch_message_and_errors(result: requests.Response) -> Tuple[str, str]:
+    dic = json.loads(result.content)
 
+    if "message" in dic.keys() and "errors" in dic.keys():
+        return (
+            json.dumps(dic["message"]),
+            json.dumps(dic["errors"])
+        )
+    
+    return None, None
 
 
 class GithubRepository:
@@ -48,10 +58,61 @@ class GithubRepository:
 
     def create(
             self,
+            description: str = "",
+            private: bool = True
+        ) -> GithubRepositoryResponse:
+        """
+        Creates a repository using our [template repository](https://github.com/Studio-Polytope/Polytope-repository-template)
+        @param description: short repository description.
+        @param private: true if repository needs to be kept private.
+        """
+
+        api_url = '/repos/Studio-Polytope/Polytope-repository-template/generate'
+        data = {
+            "owner": self.owner,
+            "name": self.config.name,
+            "description": description,
+            "private": private,
+            "include_all_branches": False, # constantly kept false to protect template
+        }
+
+        result = self._requester.request(
+            RequestVerb.POST,
+            api_url=api_url,
+            data=json.dumps(data)
+        )
+
+        if result.status_code == 201:
+            return GithubRepositoryResponse(
+                status_code=result.status_code,
+                internal_code=GHIC.Success,
+                error_msg="",
+                errors=""
+            )
+        else:
+            msg, errors = fetch_message_and_errors(result)
+            if (msg, errors) != (None, None):
+                return GithubRepositoryResponse(
+                    status_code=result.status_code,
+                    internal_code=GHIC.FailedToCreate,
+                    error_msg=msg,
+                    errors=errors
+                )
+            else:
+                # Leave errors non-parsed
+                return GithubRepositoryResponse(
+                    status_code=result.status_code,
+                    internal_code=GHIC.FailedToCreate,
+                    error_msg=bytes.decode(result.content),
+                    errors=""
+                )
+
+    def create_without_template(
+            self,
             config: Optional[GithubRepositoryConfig] = None
         ) -> GithubRepositoryResponse:
         """
-        Creates a github repository.
+        Creates a github repository. Not a first option to consider.
         Wraps [REST API for Github Repository](https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#create-a-repository-for-the-authenticated-user)
         @param config: overrides default configuration for repository. Cannot modify name here.
         """

@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
-
-import requests
+from .GithubRepositoryInternalCode import GithubRepositoryInternalCode
 
 @dataclass
 class GithubRepositoryResponse:
@@ -11,6 +10,6 @@ class GithubRepositoryResponse:
     @field internal_code: internal exit code.
     """
     status_code: Optional[int]
-    internal_code: int
+    internal_code: GithubRepositoryInternalCode
     error_msg: str
     errors: str
