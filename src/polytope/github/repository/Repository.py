@@ -58,6 +58,7 @@ class GithubRepository:
         )
         self.owner : str = owner
         self.config : GithubRepositoryConfig = GithubRepositoryConfig(name)
+        self._has_polytope_config_file : Optional[bool] = None
 
     def create(
             self,
@@ -292,3 +293,38 @@ class GithubRepository:
                     error_msg=bytes.decode(result.content),
                     errors=""
                 )
+            
+    # fetch polytope config file (polytope.yaml)
+    def fetch_polytope_config_file(self, force=False) -> Tuple[bool, str]:
+        # believe cached result
+        if self._has_polytope_config_file is not None and not force:
+            return self._has_polytope_config_file, "cached response"
+        
+        # clear cache
+        self._has_polytope_config_file = None
+
+        api_url = f'/repos/{self.owner}/{self.config.name}/contents'
+        result = self._requester.request(
+            verb=RequestVerb.GET,
+            api_url=api_url
+        )
+
+        if result.status_code == 200:
+            contents = json.loads(result.content)
+            if not isinstance(contents, list):
+                self._has_polytope_config_file = False
+                return self._has_polytope_config_file, "non-list response for contents"
+            
+            sanity = lambda content: isinstance(content, dict) and content["type"] == "file" and content["name"] == "polytope.yaml"
+            contents = list(filter(sanity, contents))
+
+            if len(contents) > 0:
+                self._has_polytope_config_file = True
+                return self._has_polytope_config_file, "detected polytope.yaml file"
+            else:
+                self._has_polytope_config_file = False
+                return self._has_polytope_config_file, "could not detect polytope.yaml file"
+            
+        else:
+            self._has_polytope_config_file = False
+            return self._has_polytope_config_file, "unsuccessful response"

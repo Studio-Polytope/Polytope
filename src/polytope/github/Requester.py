@@ -102,8 +102,6 @@ class RequestsSession(Session):
             RequestVerb.PATCH,
         ]
 
-        print(url, kwargs)
-
         request_method: Callable[..., requests.Response] = getattr(self._session, verb.lower())
         return request_method(url, **kwargs)
 
