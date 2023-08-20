@@ -1,8 +1,6 @@
 import os
 from dotenv import load_dotenv
 
-from polytope.github.repository.RepositoryConfig import GithubRepositoryConfig
-
 GITHUB_TOKEN: str = ''
 
 
