@@ -73,7 +73,6 @@ class RequestsSession(Session):
 
     def __init__(self):
         """! RequestsSession class initializer."""
-
         self._session: requests.Session = requests.Session()
 
     def request(
@@ -92,7 +91,6 @@ class RequestsSession(Session):
 
         @return  A response.
         """
-
         assert verb in [
             RequestVerb.GET,
             RequestVerb.HEAD,
@@ -102,7 +100,9 @@ class RequestsSession(Session):
             RequestVerb.PATCH,
         ]
 
-        request_method: Callable[..., requests.Response] = getattr(self._session, verb.lower())
+        request_method: Callable[..., requests.Response] = getattr(
+            self._session, verb.lower()
+        )
         return request_method(url, **kwargs)
 
     @property
@@ -119,7 +119,6 @@ class MockSession(Session):
 
     def __init__(self):
         """! MockSession class initializer."""
-
         self._logs: List[MockSession.LogEntry] = []
         self._headers: CaseInsensitiveDict = CaseInsensitiveDict()
         self.inject_request()
@@ -132,7 +131,6 @@ class MockSession(Session):
 
         @param inject_method    A request method to inject.
         """
-
         if inject_method is None:
             inject_method = self.__default_request
         self._inject_method = inject_method
@@ -151,7 +149,6 @@ class MockSession(Session):
 
         @return  A response.
         """
-
         log_entry = self.LogEntry(verb, url, result=None, **kwargs)
         self._logs.append(log_entry)
 
@@ -190,7 +187,6 @@ class MockSession(Session):
             @param result   A response result.
             @param **kwargs Additional arguments for requesting.
             """
-
             self.verb = verb
             self.url = url
             self.result = result
@@ -232,14 +228,13 @@ class Requester:
         @param base_url         A base URL of API.
         @param SessionClass     A class to use for a session.
         """
-
         assert 0 < len(base_url)
 
         self._token: "Token" = token
         self._base_url: str = base_url
 
         self._session: Session = SessionClass()
-        self._session.headers['Authorization'] = self._token.token
+        self._session.headers["Authorization"] = self._token.token
 
     def request(
         self,
@@ -255,9 +250,8 @@ class Requester:
 
         @return  A response.
         """
-
         assert 0 < len(api_url)
-        assert '/' == api_url[0]
+        assert "/" == api_url[0]
 
         url: str = self._base_url + api_url
         return self._session.request(verb, url, **kwargs)

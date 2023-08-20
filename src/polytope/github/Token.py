@@ -1,5 +1,3 @@
-
-
 class Token:
     """! Personal access token class."""
 
@@ -8,11 +6,10 @@ class Token:
 
         @param token    A personal access token string.
         """
-
         assert 0 < len(token)
 
         self._token: str = token
 
     @property
     def token(self) -> str:
-        return 'Bearer ' + self._token
+        return "Bearer " + self._token
