@@ -4,5 +4,6 @@ __all__ = [
     "Requester",
 ]
 
+from .RequestVerb import RequestVerb
 from .Token import Token
-from .Requester import RequestVerb, Requester
+from .Requester import Requester

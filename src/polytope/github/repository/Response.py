@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
-from .GithubRepositoryInternalCode import GithubRepositoryInternalCode
+from .InternalCode import GithubRepositoryInternalCode
 
 @dataclass
 class GithubRepositoryResponse:
