@@ -33,11 +33,11 @@ class Requester:
         self._base_url: str = base_url
 
         self._session: Session = SessionClass()
-        self._session.headers['Authorization'] = self._token.token
+        self._session.headers["Authorization"] = self._token.token
 
         if headers:
             for k, v in headers.items():
-                if k.lower() == 'authorization':
+                if k.lower() == "authorization":
                     continue
                 self._session.headers[k] = v
 
@@ -64,7 +64,3 @@ class Requester:
     @property
     def session(self):
         return self._session
-
-
-
-

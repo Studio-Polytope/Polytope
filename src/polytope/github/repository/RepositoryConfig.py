@@ -4,6 +4,8 @@ from typing import Tuple
 
 @dataclass
 class GithubRepositoryConfig:
+    """Wraps Configurations of Github Repository, managable by API."""
+
     name: str
     description: str = ""
     homepage: str = ""
@@ -33,7 +35,10 @@ class GithubRepositoryConfig:
             return False, "name should be non-empty"
 
         # validate squash commit combo
-        squash_commit_combo = (self.squash_merge_commit_title, self.squash_merge_commit_message)
+        squash_commit_combo = (
+            self.squash_merge_commit_title,
+            self.squash_merge_commit_message,
+        )
         if squash_commit_combo not in (
             ("PR_TITLE", "PR_BODY"),
             ("PR_TITLE", "BLANK"),

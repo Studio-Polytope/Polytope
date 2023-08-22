@@ -2,6 +2,8 @@ from enum import Enum, auto
 
 
 class GithubRepositoryInternalCode(Enum):
+    """! Internal status code of Github CRUD requests."""
+
     # Success.
     Success = auto()
     # create cannot modify repository name.

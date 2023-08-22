@@ -20,6 +20,7 @@ class Session(ABC):
         **kwargs,
     ) -> requests.Response:
         """! Request method with token authorization.
+
         This method might be wrapped or injected.
         @param verb     A HTTPS verb.
         @param url      A full-path URL.
@@ -43,7 +44,6 @@ class MockSession(Session):
 
     def __init__(self):
         """! MockSession class initializer."""
-
         self._logs: List[MockSession.LogEntry] = []
         self._headers: CaseInsensitiveDict = CaseInsensitiveDict()
         self.inject_request()
@@ -53,6 +53,7 @@ class MockSession(Session):
         inject_method: Optional["MockSession.RequestMethodCallable"] = None,
     ):
         """! Inject a request method.
+
         @param inject_method    A request method to inject.
         """
 
@@ -67,6 +68,7 @@ class MockSession(Session):
         **kwargs,
     ) -> requests.Response:
         """! Request using injected method.
+
         @param verb     A HTTPS verb.
         @param url      A full-path URL.
         @param **kwargs Additional arguments for requesting.
@@ -105,6 +107,7 @@ class MockSession(Session):
             **kwargs,
         ):
             """! LogEntry class initializer.
+
             @param verb     A HTTPS verb.
             @param url      A full-path URL.
             @param result   A response result.
@@ -142,7 +145,6 @@ class RequestsSession(Session):
 
     def __init__(self):
         """! RequestsSession class initializer."""
-
         self._session: requests.Session = requests.Session()
 
     def request(
@@ -152,6 +154,7 @@ class RequestsSession(Session):
         **kwargs,
     ) -> requests.Response:
         """! Request method with token authorization.
+
         This method might be wrapped or injected.
         @param verb     A HTTPS verb.
         @param url      A full-path URL.
@@ -168,7 +171,9 @@ class RequestsSession(Session):
             RequestVerb.PATCH,
         ]
 
-        request_method: Callable[..., requests.Response] = getattr(self._session, verb.lower())
+        request_method: Callable[..., requests.Response] = getattr(
+            self._session, verb.lower()
+        )
         return request_method(url, **kwargs)
 
     @property

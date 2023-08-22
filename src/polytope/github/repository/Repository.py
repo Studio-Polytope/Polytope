@@ -1,6 +1,5 @@
 import json
 from dataclasses import asdict
-from enum import Enum, auto
 from typing import TYPE_CHECKING, Optional, Tuple
 
 import re
@@ -20,25 +19,23 @@ if TYPE_CHECKING:
     from polytope.github import Token
 
 # alphanumeric or hyphen, starts & ends with alphanumeric
-GITHUB_USERNAME_REGEX=r"^[a-zA-Z\d](?:[a-zA-Z\d]|-(?=[a-zA-Z\d])){0,37}[a-zA-Z\d]$"
+GITHUB_USERNAME_REGEX = r"^[a-zA-Z\d](?:[a-zA-Z\d]|-(?=[a-zA-Z\d])){0,37}[a-zA-Z\d]$"
 # alphanumeric, hyphen, underscore. starts & ends with alphanumeric.
-GITHUB_REPONAME_REGEX=r"^[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?$"
+GITHUB_REPONAME_REGEX = r"^[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?$"
+
 
 class GithubRepository:
     """
     Controller of Github Repository.
+
     @param token: Personal Access Token.
     @param owner: Github Username of Repository Owner.
     @param name: Name of the repository.
     """
-    def __init__(
-            self,
-            owner: str,
-            name: str,
-            token: "Token",
-            session: Session = RequestsSession
-        ) -> None:
 
+    def __init__(
+        self, owner: str, name: str, token: "Token", session: Session = RequestsSession
+    ) -> None:
         # Much generous validation than Github's.
         # Github has 39 chars for username at max.
         assert 0 < len(owner)
@@ -49,50 +46,45 @@ class GithubRepository:
 
         self._requester = Requester(
             token=token,
-            base_url=f"https://api.github.com",
-            headers = {
+            base_url="https://api.github.com",
+            headers={
                 "Accept": "application/vnd.github+json",
                 "X-Github-Api-Version": "2022-11-28",
             },
-            SessionClass=session
+            SessionClass=session,
         )
 
-
-        self.owner : str = owner
-        self.config : GithubRepositoryConfig = GithubRepositoryConfig(name)
-        self._has_polytope_config_file : Optional[bool] = None
+        self.owner: str = owner
+        self.config: GithubRepositoryConfig = GithubRepositoryConfig(name)
+        self._has_polytope_config_file: Optional[bool] = None
 
     @property
     def create_url(self):
-        """
-        URL for repository creation.
-        """
-        return '/repos/Studio-Polytope/Polytope-repository-template/generate'
-    
+        """URL for repository creation."""
+        return "/repos/Studio-Polytope/Polytope-repository-template/generate"
+
     def create(
-            self,
-            description: str = "",
-            private: bool = True
-        ) -> GithubRepositoryResponse:
+        self, description: str = "", private: bool = True
+    ) -> GithubRepositoryResponse:
         """
-        Creates a repository using our [template repository](https://github.com/Studio-Polytope/Polytope-repository-template)
+        Create a repository using our template repository.
+
+        Template repository [(click)](https://github.com/Studio-Polytope/Polytope-repository-template).
+
         @param description: short repository description.
         @param private: true if repository needs to be kept private.
         """
-
         api_url = self.create_url
         data = {
             "owner": self.owner,
             "name": self.config.name,
             "description": description,
             "private": private,
-            "include_all_branches": False, # constantly kept false to protect template
+            "include_all_branches": False,  # constantly kept false to protect template
         }
 
         result = self._requester.request(
-            RequestVerb.POST,
-            api_url=api_url,
-            data=json.dumps(data)
+            RequestVerb.POST, api_url=api_url, data=json.dumps(data)
         )
 
         if result.status_code == 201:
@@ -100,25 +92,24 @@ class GithubRepository:
                 status_code=result.status_code,
                 internal_code=GHIC.Success,
                 error_msg="",
-                errors=""
+                errors="",
             )
         else:
             return post_process_error_response(result, GHIC.FailedToCreate)
 
     @property
     def create_without_template_url(self):
-        return '/user/repos'
-    
+        return "/user/repos"
+
     def create_without_template(
-            self,
-            config: Optional[GithubRepositoryConfig] = None
-        ) -> GithubRepositoryResponse:
+        self, config: Optional[GithubRepositoryConfig] = None
+    ) -> GithubRepositoryResponse:
         """
-        Creates a github repository. Not a first option to consider.
+        Create a github repository. Not a first option to consider.
+
         Wraps [REST API for Github Repository](https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#create-a-repository-for-the-authenticated-user)
         @param config: overrides default configuration for repository. Cannot modify name here.
         """
-
         if config is None:
             config = self.config
 
@@ -128,24 +119,24 @@ class GithubRepository:
                 status_code=None,
                 internal_code=GHIC.ConfigValidationFailed,
                 error_msg=f'config validation failed while creation: "{validation_msg}"',
-                errors=""
+                errors="",
             )
-        
+
         # For safety, we forbid changing name in create stage.
         if self.config.name != config.name:
             return GithubRepositoryResponse(
                 status_code=None,
                 internal_code=GHIC.ForbiddenNameChangeOnCreation,
                 error_msg="cannot modify name on creation step",
-                errors=""
+                errors="",
             )
-        
+
         data = asdict(config)
 
         result = self._requester.request(
             verb=RequestVerb.POST,
             api_url=self.create_without_template_url,
-            data=json.dumps(data)
+            data=json.dumps(data),
         )
 
         if result.status_code == 201:
@@ -154,23 +145,20 @@ class GithubRepository:
                 status_code=result.status_code,
                 internal_code=GHIC.Success,
                 error_msg="",
-                errors=""
+                errors="",
             )
         else:
-            return post_process_error_response(result, GHIC.FailedToCreateWithoutTemplate)
-    
+            return post_process_error_response(
+                result, GHIC.FailedToCreateWithoutTemplate
+            )
+
     @property
     def get_url(self):
-        return f'/repos/{self.owner}/{self.config.name}'
-    
+        return f"/repos/{self.owner}/{self.config.name}"
+
     def get(self):
-        """
-        Get a repository named {owner}/{repo}.
-        """
-        result = self._requester.request(
-            verb=RequestVerb.GET,
-            api_url=self.get_url
-        )
+        """Get a repository named {owner}/{repo}."""
+        result = self._requester.request(verb=RequestVerb.GET, api_url=self.get_url)
 
         # TODO what to read?
 
@@ -179,21 +167,19 @@ class GithubRepository:
                 status_code=result.status_code,
                 internal_code=GHIC.Success,
                 error_msg="",
-                errors=""
+                errors="",
             )
         else:
             return post_process_error_response(result, GHIC.FailedToRead)
-    
+
     @property
     def update_url(self):
-        return f'/repos/{self.owner}/{self.config.name}'
-    
-    def update(
-            self,
-            config: Optional[GithubRepositoryConfig] = None
-        ):
+        return f"/repos/{self.owner}/{self.config.name}"
+
+    def update(self, config: Optional[GithubRepositoryConfig] = None):
         """
-        Updates repository by config.
+        Update repository by config.
+
         @param config: GithubRepositoryConfig class. Includes name.
         """
 
@@ -203,7 +189,7 @@ class GithubRepository:
                 status_code=None,
                 internal_code=GHIC.UpdateWithoutPolytopeFile,
                 error_msg=reason,
-                errors=''
+                errors="",
             )
 
         if config is None:
@@ -215,15 +201,13 @@ class GithubRepository:
                 status_code=None,
                 internal_code=GHIC.ConfigValidationFailed,
                 error_msg=f'config for update is invalid: "{validation_result}"',
-                errors=""
+                errors="",
             )
 
         data = asdict(config)
 
         result = self._requester.request(
-            verb=RequestVerb.PATCH,
-            api_url=self.update_url,
-            data=json.dumps(data)
+            verb=RequestVerb.PATCH, api_url=self.update_url, data=json.dumps(data)
         )
 
         # succeeded to update.
@@ -234,32 +218,28 @@ class GithubRepository:
                 status_code=result.status_code,
                 internal_code=GHIC.Success,
                 error_msg="",
-                errors=""
+                errors="",
             )
         else:
             return post_process_error_response(result, GHIC.FailedToUpdate)
-    
+
     @property
     def delete_url(self):
-        return f'/repos/{self.owner}/{self.config.name}'
-    
-    def delete(self):
-        """
-        Deletes repository.
-        """
+        return f"/repos/{self.owner}/{self.config.name}"
 
+    def delete(self):
+        """Delete the repository."""
         has_polytope_config_file, reason = self.fetch_polytope_config_file()
         if not has_polytope_config_file:
             return GithubRepositoryResponse(
                 status_code=None,
                 internal_code=GHIC.DeleteWithoutPolytopeFile,
                 error_msg=reason,
-                errors=''
+                errors="",
             )
 
         result = self._requester.request(
-            verb=RequestVerb.DELETE,
-            api_url=self.delete_url
+            verb=RequestVerb.DELETE, api_url=self.delete_url
         )
 
         # succeeded to update.
@@ -268,38 +248,42 @@ class GithubRepository:
                 status_code=result.status_code,
                 internal_code=GHIC.Success,
                 error_msg="",
-                errors=""
+                errors="",
             )
         else:
             return post_process_error_response(result, GHIC.FailedToDelete)
 
-    @property    
+    @property
     def fetch_contents_url(self):
-        return f'/repos/{self.owner}/{self.config.name}/contents'
+        return f"/repos/{self.owner}/{self.config.name}/contents"
 
     # fetch polytope config file (polytope.yaml)
-    def fetch_polytope_config_file(self, ignore_cache: bool = False) -> Tuple[bool, str]:
+    def fetch_polytope_config_file(
+        self, ignore_cache: bool = False
+    ) -> Tuple[bool, str]:
         """
-        Fetches polytope config file (currently polytope.yaml)
+        Fetch polytope config file (currently polytope.yaml).
+
         @param ignore_cache: If set to False, use cached value instead of sending requests.
         """
-        
+
         # believe cached result
         if self._has_polytope_config_file is not None and not ignore_cache:
             return self._has_polytope_config_file, "cached response"
-        
+
         # clear cache
         self._has_polytope_config_file = None
 
         result = self._requester.request(
-            verb=RequestVerb.GET,
-            api_url=self.fetch_contents_url
+            verb=RequestVerb.GET, api_url=self.fetch_contents_url
         )
 
         if result.status_code == 200:
-            self._has_polytope_config_file, reason = parse_polytope_config_file(result.content)
+            self._has_polytope_config_file, reason = parse_polytope_config_file(
+                result.content
+            )
             return self._has_polytope_config_file, reason
-            
+
         else:
             self._has_polytope_config_file = False
             return self._has_polytope_config_file, "unsuccessful response"
@@ -307,19 +291,20 @@ class GithubRepository:
 
 # Utility functions
 
+
 def is_valid_github_repository_name(name: str) -> bool:
     return re.match(GITHUB_REPONAME_REGEX, name) is not None
+
 
 def is_valid_github_user_name(name: str) -> bool:
     return re.match(GITHUB_USERNAME_REGEX, name) is not None
 
+
 def fetch_message_and_errors(result: requests.Response) -> Tuple[str, str]:
-    """
-    post-processor of erroneous request.Response.
-    """
+    """post-processor of erroneous request.Response."""
     if not result.content:
         return None, None
-    
+
     # TODO handle error while decoding json
     dic = json.loads(result.content)
 
@@ -327,41 +312,44 @@ def fetch_message_and_errors(result: requests.Response) -> Tuple[str, str]:
         return None, None
 
     if "message" in dic.keys() and "errors" in dic.keys():
-        return (
-            json.dumps(dic["message"]),
-            json.dumps(dic["errors"])
-        )
-    
+        return (json.dumps(dic["message"]), json.dumps(dic["errors"]))
+
     return None, None
 
+
 def parse_polytope_config_file(
-    resp_content: str | bytearray | None
+    resp_content: str | bytearray | None,
 ) -> Tuple[bool, str]:
     """
     Parse http response content from Github root directory.
-    @param content: 
+
+    @param resp_content: content of http response.
     @return (if there is a polytope config file, error msg while finding configs)
     """
     if not resp_content:
         return False, "empty response content"
-    
+
     # TODO error handling while json unmarshal
     contents = json.loads(resp_content)
 
     if not isinstance(contents, list):
         return False, "non-list response for contents"
-    
-    sanity = lambda content: isinstance(content, dict) and content["type"] == "file" and content["name"] == "polytope.yaml"
+
+    sanity = (
+        lambda content: isinstance(content, dict)
+        and content["type"] == "file"
+        and content["name"] == "polytope.yaml"
+    )
     contents = list(filter(sanity, contents))
 
     if len(contents) > 0:
         return True, "detected polytope.yaml file"
     else:
         return False, "could not detect polytope.yaml file"
-    
+
+
 def post_process_error_response(
-    result: requests.Response,
-    code: GHIC
+    result: requests.Response, code: GHIC
 ) -> GithubRepositoryResponse:
     msg, errors = fetch_message_and_errors(result)
     if (msg, errors) != (None, None):
@@ -369,15 +357,15 @@ def post_process_error_response(
             status_code=result.status_code,
             internal_code=code,
             error_msg=msg,
-            errors=errors
+            errors=errors,
         )
     else:
         return _make_unparsed_error_response(result, code)
-    
+
+
 # Translate http response to github response, when we failed to parse it.
 def _make_unparsed_error_response(
-    result: requests.Response,
-    code: GHIC  
+    result: requests.Response, code: GHIC
 ) -> GithubRepositoryResponse:
     # Leave errors unparsed
     error_msg = ""
@@ -388,5 +376,5 @@ def _make_unparsed_error_response(
         status_code=result.status_code,
         internal_code=code,
         error_msg=error_msg,
-        errors=""
+        errors="",
     )

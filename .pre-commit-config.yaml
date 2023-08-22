@@ -25,4 +25,4 @@ repos:
             'pydocstyle>=5.0.0',
         ]
         exclude: test/
-        args: ['--ignore=D100,D102,D103,D104,D105,D106,D107']
+        args: ['--ignore=D100,D102,D103,D104,D105,D106,D107,D202,E501,W503']
