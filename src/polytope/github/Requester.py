@@ -27,7 +27,6 @@ class Requester:
         @param SessionClass     A class to use for a session.
         @param headers          Additional headers other than Authorization to fix in session.
         """
-
         assert 0 < len(base_url)
 
         self._token: "Token" = token
@@ -56,9 +55,8 @@ class Requester:
 
         @return  A response.
         """
-
         assert 0 < len(api_url)
-        assert '/' == api_url[0]
+        assert "/" == api_url[0]
 
         url: str = self._base_url + api_url
         return self._session.request(verb, url, **kwargs)

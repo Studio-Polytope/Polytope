@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-GITHUB_TOKEN: str = ''
+GITHUB_TOKEN: str = ""
 
 
 def load_environment():
