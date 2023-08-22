@@ -6,9 +6,10 @@ from polytope.github.RequestVerb import RequestVerb as RV
 from polytope.github.Session import MockSession
 from polytope.github.Token import Token
 
-from polytope.github.repository import GithubRepository, GithubRepositoryConfig
+from polytope.github.repository.Repository import GithubRepository
+from polytope.github.repository.RepositoryConfig import GithubRepositoryConfig
 from polytope.github.repository.InternalCode import GithubRepositoryInternalCode as GHIC
-    
+
 def get_test_repository():
     return GithubRepository(
         owner="test-owner",
@@ -49,7 +50,7 @@ def get_test_repository_with_full_response():
             )
 
         return resp
-    
+
     repo._requester._session.inject_request(mock_request)
 
     return repo
@@ -117,9 +118,9 @@ def test_delete_repository_success():
 
 def test_update_repository_with_invalid_config():
     ghr = get_test_repository()
-    
+
     ghr._has_polytope_config_file = True
-    
+
     upd_config = GithubRepositoryConfig(name="") # empty name: invalid config
     resp = ghr.update(upd_config)
 
@@ -140,7 +141,7 @@ def test_invalid_repo_init():
     # empty owner
     with pytest.raises(AssertionError):
         _ = GithubRepository("", "test_name", Token("test_token"), MockSession)
-    
+
     # empty name
     with pytest.raises(AssertionError):
         _ = GithubRepository("test_owner", "", Token("test_token"), MockSession)
@@ -148,7 +149,7 @@ def test_invalid_repo_init():
     # invalid owner name
     with pytest.raises(AssertionError):
         _ = GithubRepository("--o-o----o-", "test_name", Token("test_token"), MockSession)
-    
+
     # invalid user name
     with pytest.raises(AssertionError):
         _ = GithubRepository("test-owner", "malicious/endpoint/like/user?name=kk", Token("test_token"), MockSession)
