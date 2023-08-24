@@ -1,4 +1,5 @@
 import random
+from typing import List
 
 # collision probability in 150,000 entries ~ 1%
 # lowercase alphabet + digit except [l, 1, o, 0]
@@ -60,9 +61,51 @@ class PolytopeUUID:
         char_list = [random.choice(self.alphabet) for _ in range(self.length)]
         return "".join(char_list)
 
+    def uuid_bulk(self, count: int) -> List[str]:
+        """! A method for bulk generating uuid.
+
+        @param count    number of uuid to generate
+        """
+        total = len(self.alphabet) ** self.length
+
+        if count <= 0:
+            raise ValueError("count must be positive.")
+
+        if count > total:
+            raise ValueError("count is too large to generate distinct uuids")
+
+        # generate distinct integers in range [0, total)
+        num_list = []
+        index = {}
+        for i in range(count):
+            rnd = random.randrange(0, total - i)
+            num_list.append(rnd if rnd not in index else index[rnd])
+            if rnd != total - i - 1:
+                if total - i - 1 not in index:
+                    index[rnd] = total - i - 1
+                else:
+                    index[rnd] = index[total - i - 1]
+
+        uuid_list = []
+        for num in num_list:
+            uuid = ""
+            for _ in range(self.length):
+                uuid += self.alphabet[num % len(self.alphabet)]
+                num //= len(self.alphabet)
+            uuid_list.append(uuid)
+
+        return uuid_list
+
 
 def uuid(
     alphabet: str = DEFAULT_ALPHABET, length: int = DEFAULT_LENGTH
 ) -> str:
     generator = PolytopeUUID(alphabet, length)
     return generator.uuid()
+
+
+def uuid_bulk(
+    count: int, alphabet: str = DEFAULT_ALPHABET, length: int = DEFAULT_LENGTH
+) -> List[str]:
+    generator = PolytopeUUID(alphabet, length)
+    return generator.uuid_bulk(count)

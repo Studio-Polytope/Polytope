@@ -20,6 +20,14 @@ def test_uuid():
     assert len(gen.alphabet) == 32
     assert gen.length == 8
 
+def test_bulk():
+    uuids = uuidgen.uuid_bulk(9, 'abc', 2)
+    for uuid in uuids:
+        assert len(uuid) == 2
+        for c in uuid:
+            assert c in 'abc'
+    assert(len(uuids) == len(set(uuids)))
+
 def test_value_error():
     with pytest.raises(ValueError):
         gen = uuidgen.PolytopeUUID(alphabet='aa')
@@ -27,3 +35,5 @@ def test_value_error():
     with pytest.raises(ValueError):
         uuid = uuidgen.uuid('abcd', 0)
 
+    with pytest.raises(ValueError):
+        uuids = uuidgen.uuid_bulk(10, 'abc', 2)
