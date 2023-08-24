@@ -1,6 +1,6 @@
 import pytest
 
-import polytope.core.uuidgen as uuidgen
+import polytope.utils.uuidgen as uuidgen
 
 
 def test_uuid_collision():
