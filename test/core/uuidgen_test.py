@@ -19,3 +19,11 @@ def test_uuid():
     gen = uuidgen.PolytopeUUID()
     assert len(gen.alphabet) == 32
     assert gen.length == 8
+
+def test_value_error():
+    with pytest.raises(ValueError):
+        gen = uuidgen.PolytopeUUID(alphabet='aa')
+
+    with pytest.raises(ValueError):
+        uuid = uuidgen.uuid('abcd', 0)
+
