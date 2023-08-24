@@ -3,6 +3,11 @@ import pytest
 import polytope.core.uuidgen as uuidgen
 
 
+def test_uuid_collision():
+    # fail probability ~ 5 * 10^-5
+    uuids = [uuidgen.uuid() for _ in range(10000)]
+    assert len(uuids) == len(set(uuids))
+
 def test_uuid():
     assert len(uuidgen.uuid('abcde', 3)) == 3
 
