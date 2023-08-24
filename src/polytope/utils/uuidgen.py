@@ -40,7 +40,7 @@ class PolytopeUUID:
 
     @alphabet.setter
     def alphabet(self, value: str):
-        """! A getter method for alphabet property."""
+        """! A setter method for alphabet property."""
         if len(value) == 0:
             raise ValueError("alphabet must be a non-empty string.")
         if len(set(value)) != len(value):
@@ -50,7 +50,7 @@ class PolytopeUUID:
 
     @length.setter
     def length(self, value: int):
-        """! A getter method for length property."""
+        """! A setter method for length property."""
         if value <= 0:
             raise ValueError("length must be positive.")
 
@@ -62,9 +62,9 @@ class PolytopeUUID:
         return "".join(char_list)
 
     def uuid_bulk(self, count: int) -> List[str]:
-        """! A method for bulk generating uuid.
+        """! A method for bulk generating a list of distinct uuids.
 
-        @param count    number of uuid to generate
+        @param count    number of uuids to generate
         """
         total = len(self.alphabet) ** self.length
 
