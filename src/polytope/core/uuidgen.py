@@ -9,21 +9,16 @@ DEFAULT_LENGTH = 8
 class PolytopeUUID:
     """UUID generator class."""
 
-    def __init__(self, alphabet: str = None, length: int = 0):
+    def __init__(
+        self, alphabet: str = DEFAULT_ALPHABET, length: int = DEFAULT_LENGTH
+    ):
         """! PolytopeUUID class initializer.
 
         @param alphabet     alphabet for generating uuid
         @param length       length of uuid
         """
-        if alphabet is None:
-            self._alphabet = DEFAULT_ALPHABET
-        else:
-            self._alphabet = alphabet
-
-        if length == 0:
-            self._length = DEFAULT_LENGTH
-        else:
-            self._length = length
+        self._alphabet = alphabet
+        self._length = length
 
     @property
     def alphabet(self):
