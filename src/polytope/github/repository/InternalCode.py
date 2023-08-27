@@ -20,7 +20,7 @@ class GithubRepositoryInternalCode(Enum):
     FailedToUpdate = auto()
     # deletion failed on Github side.
     FailedToDelete = auto()
-    # cannot update repository without polytope config file.
+    # cannot update repository without Polytope config file.
     UpdateWithoutPolytopeFile = auto()
-    # cannot delete repository without polytope config file.
+    # cannot delete repository without Polytope config file.
     DeleteWithoutPolytopeFile = auto()
