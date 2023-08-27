@@ -1,6 +1,6 @@
 from typing import List
 
-from polytope.github import RequestVerb
+from polytope.github.RequestVerb import RequestVerb
 
 
 def test_all_verbs():

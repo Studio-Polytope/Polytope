@@ -1,7 +1,8 @@
 import pytest
 
-from polytope.github import Token, RequestVerb, Requester
-from polytope.github.Requester import MockSession
+from polytope.github import Token, Requester
+from polytope.github.RequestVerb import RequestVerb
+from polytope.github.Session import MockSession
 
 
 def test_auth_injection():
