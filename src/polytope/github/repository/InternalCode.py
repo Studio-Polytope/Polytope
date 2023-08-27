@@ -1,6 +1,7 @@
 from enum import Enum, auto
 
 
+# @todo elaborate the reason of failure, referring to github error message.
 class GithubRepositoryInternalCode(Enum):
     """! Internal status code of Github CRUD requests."""
 
