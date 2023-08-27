@@ -1,6 +1,6 @@
 import json
 from dataclasses import asdict
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import TYPE_CHECKING, Optional, Tuple, Type
 
 import re
 import requests
@@ -25,22 +25,23 @@ GITHUB_REPONAME_REGEX = r"^[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?$"
 
 
 class GithubRepository:
-    """
-    Controller of Github Repository.
+    """! Controller of Github Repository.
 
-    @param token: Personal Access Token.
-    @param owner: Github Username of Repository Owner.
-    @param name: Name of the repository.
+    @param owner        Github Username of Repository Owner.
+    @param name         Name of the repository.
+    @param token        Personal Access Token.
+    @param session      type of session.
     """
 
     def __init__(
-        self, owner: str, name: str, token: "Token", session: Session = RequestsSession
+        self,
+        owner: str,
+        name: str,
+        token: "Token",
+        session_cls: Type[Session] = RequestsSession,
     ) -> None:
-        # Much generous validation than Github's.
-        # Github has 39 chars for username at max.
         assert 0 < len(owner)
         assert is_valid_github_user_name(owner)
-        # TODO name validation?
         assert 0 < len(name)
         assert is_valid_github_repository_name(name)
 
@@ -51,7 +52,7 @@ class GithubRepository:
                 "Accept": "application/vnd.github+json",
                 "X-Github-Api-Version": "2022-11-28",
             },
-            SessionClass=session,
+            SessionClass=session_cls,
         )
 
         self.owner: str = owner
@@ -59,15 +60,14 @@ class GithubRepository:
         self._has_polytope_config_file: Optional[bool] = None
 
     @property
-    def create_url(self):
-        """URL for repository creation."""
+    def create_url(self) -> str:
+        """! URL for repository creation."""
         return "/repos/Studio-Polytope/Polytope-repository-template/generate"
 
     def create(
         self, description: str = "", private: bool = True
     ) -> GithubRepositoryResponse:
-        """
-        Create a repository using our template repository.
+        """! Create a repository using our template repository.
 
         Template repository [(click)](https://github.com/Studio-Polytope/Polytope-repository-template).
 
@@ -98,14 +98,13 @@ class GithubRepository:
             return post_process_error_response(result, GHIC.FailedToCreate)
 
     @property
-    def create_without_template_url(self):
+    def create_without_template_url(self) -> str:
         return "/user/repos"
 
     def create_without_template(
         self, config: Optional[GithubRepositoryConfig] = None
     ) -> GithubRepositoryResponse:
-        """
-        Create a github repository. Not a first option to consider.
+        """! Create a github repository. Not a first option to consider.
 
         Wraps [REST API for Github Repository](https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#create-a-repository-for-the-authenticated-user)
         @param config: overrides default configuration for repository. Cannot modify name here.
@@ -153,14 +152,15 @@ class GithubRepository:
             )
 
     @property
-    def get_url(self):
+    def get_url(self) -> str:
+        """! URL to get repository info."""
         return f"/repos/{self.owner}/{self.config.name}"
 
-    def get(self):
-        """Get a repository named {owner}/{repo}."""
+    def get(self) -> GithubRepositoryResponse:
+        """! Get a repository named {owner}/{repo}."""
         result = self._requester.request(verb=RequestVerb.GET, api_url=self.get_url)
 
-        # TODO what to read?
+        # @todo define content to read
 
         if result.status_code == 200:
             return GithubRepositoryResponse(
@@ -173,10 +173,13 @@ class GithubRepository:
             return post_process_error_response(result, GHIC.FailedToRead)
 
     @property
-    def update_url(self):
+    def update_url(self) -> str:
+        """! URL for update."""
         return f"/repos/{self.owner}/{self.config.name}"
 
-    def update(self, config: Optional[GithubRepositoryConfig] = None):
+    def update(
+        self, config: Optional[GithubRepositoryConfig] = None
+    ) -> GithubRepositoryResponse:
         """
         Update repository by config.
 
@@ -224,11 +227,12 @@ class GithubRepository:
             return post_process_error_response(result, GHIC.FailedToUpdate)
 
     @property
-    def delete_url(self):
+    def delete_url(self) -> str:
+        """! URL for delete."""
         return f"/repos/{self.owner}/{self.config.name}"
 
-    def delete(self):
-        """Delete the repository."""
+    def delete(self) -> GithubRepositoryResponse:
+        """! Delete the repository."""
         has_polytope_config_file, reason = self.fetch_polytope_config_file()
         if not has_polytope_config_file:
             return GithubRepositoryResponse(
@@ -254,15 +258,16 @@ class GithubRepository:
             return post_process_error_response(result, GHIC.FailedToDelete)
 
     @property
-    def fetch_contents_url(self):
+    def fetch_contents_url(self) -> str:
+        """! URL to fetch contents."""
         return f"/repos/{self.owner}/{self.config.name}/contents"
 
-    # fetch polytope config file (polytope.yaml)
+    # fetch Polytope config file (polytope.yaml)
     def fetch_polytope_config_file(
         self, ignore_cache: bool = False
     ) -> Tuple[bool, str]:
         """
-        Fetch polytope config file (currently polytope.yaml).
+        Fetch Polytope config file (currently polytope.yaml).
 
         @param ignore_cache: If set to False, use cached value instead of sending requests.
         """
@@ -301,7 +306,7 @@ def is_valid_github_user_name(name: str) -> bool:
 
 
 def fetch_message_and_errors(result: requests.Response) -> Tuple[str, str]:
-    """post-processor of erroneous request.Response."""
+    """! post-processor of erroneous request.Response."""
     if not result.content:
         return None, None
 
@@ -320,16 +325,15 @@ def fetch_message_and_errors(result: requests.Response) -> Tuple[str, str]:
 def parse_polytope_config_file(
     resp_content: str | bytearray | None,
 ) -> Tuple[bool, str]:
-    """
-    Parse http response content from Github root directory.
+    """! Parse http response content from Github root directory.
 
     @param resp_content: content of http response.
-    @return (if there is a polytope config file, error msg while finding configs)
+    @return (if there is a Polytope config file, error msg while finding configs)
     """
     if not resp_content:
         return False, "empty response content"
 
-    # TODO error handling while json unmarshal
+    # @todo error handling while json unmarshal
     contents = json.loads(resp_content)
 
     if not isinstance(contents, list):

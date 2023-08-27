@@ -4,7 +4,7 @@ from typing import Tuple
 
 @dataclass
 class GithubRepositoryConfig:
-    """Wraps Configurations of Github Repository, managable by API."""
+    """! Wraps Configurations of Github Repository, managable by API."""
 
     name: str
     description: str = ""
@@ -30,7 +30,7 @@ class GithubRepositoryConfig:
     is_template: bool = False
 
     def validate(self) -> Tuple[bool, str]:
-        # TODO : adopt github's own validation rules in advance
+        # @todo adopt github's own validation rules in advance
         if len(self.name) == 0:
             return False, "name should be non-empty"
 

@@ -5,8 +5,7 @@ from .InternalCode import GithubRepositoryInternalCode
 
 @dataclass
 class GithubRepositoryResponse:
-    """
-    Response template of Github Repository CRUD.
+    """! Response template of Github Repository CRUD.
 
     @field status_code: HTTP code.
     @field internal_code: internal exit code.

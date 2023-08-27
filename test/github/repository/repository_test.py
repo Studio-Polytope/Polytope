@@ -15,7 +15,7 @@ def get_test_repository():
         owner="test-owner",
         name="test_repo_name",
         token=Token("test_token"),
-        session=MockSession
+        session_cls=MockSession
     )
 
 def get_test_repository_with_full_response():
@@ -23,7 +23,7 @@ def get_test_repository_with_full_response():
         owner="test-owner",
         name="test_repo_name",
         token=Token("test_token"),
-        session=MockSession
+        session_cls=MockSession
     )
 
     def mock_request(verb: RV, url: str, **kwargs) -> requests.Response:
