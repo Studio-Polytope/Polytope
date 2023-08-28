@@ -12,7 +12,7 @@ class Requester:
 
     def __init__(
         self,
-        token: "Token",
+        token: Token,
         base_url: str,
         SessionClass: Type[Session] = RequestsSession,
         headers: Optional[Dict[str, str]] = None,
@@ -26,7 +26,7 @@ class Requester:
         """
         assert 0 < len(base_url)
 
-        self._token: "Token" = token
+        self._token: Token = token
         self._base_url: str = base_url
 
         self._session: Session = SessionClass()

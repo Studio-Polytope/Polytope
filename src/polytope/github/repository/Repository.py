@@ -35,7 +35,7 @@ class GithubRepository:
         self,
         owner: str,
         name: str,
-        token: "Token",
+        token: Token,
         session_cls: Type[Session] = RequestsSession,
     ) -> None:
         assert 0 < len(owner)
