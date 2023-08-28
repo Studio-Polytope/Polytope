@@ -3,7 +3,10 @@ from typing import Any, List
 
 
 class RequestVerb(str, Enum):
-    """! HTTP verbs enumeration class."""
+    """HTTP verb.
+
+    Each enumerator has a string equal to its name as a value.
+    """
 
     @staticmethod
     def _generate_next_value_(
