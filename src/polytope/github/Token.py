@@ -1,15 +1,24 @@
+from typing import Final
+
+
 class Token:
-    """! Personal access token class."""
+    """The personal access token.
 
-    def __init__(self, token: str):
-        """! Token class initializer.
+    Attributes:
+        token (str): A read-only personal access token string.
+    """
 
-        @param token    A personal access token string.
+    def __init__(self, token: str) -> None:
+        """Initialize the instance based on given token key.
+
+        Args:
+            token (str): A personal access token string.
         """
         assert 0 < len(token)
 
-        self._token: str = token
+        self._token: Final[str] = token
 
     @property
     def token(self) -> str:
-        return "Bearer " + self._token
+        """Return the Bearer token string."""
+        return f"Bearer {self._token}"
