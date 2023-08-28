@@ -305,7 +305,9 @@ def is_valid_github_user_name(name: str) -> bool:
     return re.match(GITHUB_USERNAME_REGEX, name) is not None
 
 
-def fetch_message_and_errors(result: requests.Response) -> Tuple[str, str]:
+def fetch_message_and_errors(
+    result: requests.Response,
+) -> Tuple[str, str] | Tuple[None, None]:
     """! post-processor of erroneous request.Response."""
     if not result.content:
         return None, None
@@ -323,7 +325,7 @@ def fetch_message_and_errors(result: requests.Response) -> Tuple[str, str]:
 
 
 def parse_polytope_config_file(
-    resp_content: str | bytearray | None,
+    resp_content: str | bytes | bytearray | None,
 ) -> Tuple[bool, str]:
     """! Parse http response content from Github root directory.
 
@@ -357,6 +359,8 @@ def post_process_error_response(
 ) -> GithubRepositoryResponse:
     msg, errors = fetch_message_and_errors(result)
     if (msg, errors) != (None, None):
+        assert msg is not None
+        assert errors is not None
         return GithubRepositoryResponse(
             status_code=result.status_code,
             internal_code=code,
