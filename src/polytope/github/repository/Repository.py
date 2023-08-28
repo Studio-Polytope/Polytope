@@ -1,6 +1,6 @@
 import json
 from dataclasses import asdict
-from typing import TYPE_CHECKING, Optional, Tuple, Type
+from typing import Optional, Tuple, Type
 
 import re
 import requests
@@ -9,14 +9,12 @@ from polytope.github import Requester
 from polytope.github.RequestVerb import RequestVerb
 from polytope.github.Session import RequestsSession
 from polytope.github.Session import Session
+from polytope.github.Token import Token
 
 from .InternalCode import GithubRepositoryInternalCode as GHIC
 from .RepositoryConfig import GithubRepositoryConfig
 from .Response import GithubRepositoryResponse
 
-# only for mypy.
-if TYPE_CHECKING:
-    from polytope.github import Token
 
 # alphanumeric or hyphen, starts & ends with alphanumeric
 GITHUB_USERNAME_REGEX = r"^[a-zA-Z\d](?:[a-zA-Z\d]|-(?=[a-zA-Z\d])){0,37}[a-zA-Z\d]$"

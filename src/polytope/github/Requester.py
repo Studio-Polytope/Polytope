@@ -1,13 +1,10 @@
-from typing import TYPE_CHECKING, Type, Optional, Dict
+from typing import Type, Optional, Dict
 
 import requests
 from polytope.github.RequestVerb import RequestVerb
 
 from polytope.github.Session import RequestsSession, Session
-
-"""This clause is only processed by mypy."""
-if TYPE_CHECKING:
-    from .Token import Token
+from polytope.github.Token import Token
 
 
 class Requester:
