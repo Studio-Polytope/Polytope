@@ -32,4 +32,12 @@ repos:
     -   id: mypy
         additional_dependencies: [tokenize-rt==5.2.0, types-requests]
         exclude: ^test/
-        args: [--strict, --ignore-missing-imports]
+        args: [
+            --ignore-missing-imports,
+            --disallow-any-unimported,
+            --no-implicit-optional,
+            --check-untyped-defs,
+            --warn-return-any,
+            --warn-unused-ignores,
+            --show-error-codes,
+        ]
