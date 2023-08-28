@@ -2,7 +2,7 @@ from abc import ABC
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ProblemPublicTest:
     """! A problem's public test dataclass."""
 
@@ -19,7 +19,7 @@ class ProblemPublicTest:
     verify_output: bool = False
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ProblemTest(ABC):
     """! A problem's secret test dataclass."""
 
@@ -35,7 +35,7 @@ class ProblemTest(ABC):
     # TODO: Define attributes.
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ProblemTestRaw(ProblemTest):
     """! A text-raw secret test dataclass."""
 
@@ -43,7 +43,7 @@ class ProblemTestRaw(ProblemTest):
     input: str
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ProblemTestScript(ProblemTest):
     """! A script-based secret test dataclass."""
 

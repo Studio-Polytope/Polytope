@@ -11,7 +11,7 @@ class ProblemValidatorVerdict(Enum):
     Invalid = auto()
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ProblemValidatorTest:
     """! A test scenario of problem validator dataclass."""
 

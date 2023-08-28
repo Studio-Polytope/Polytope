@@ -15,7 +15,7 @@ class ProblemCheckerVerdict(Enum):
     Crashed = auto()
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ProblemCheckerTest:
     """! A test scenario of problem checker dataclass."""
 

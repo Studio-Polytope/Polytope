@@ -4,7 +4,7 @@ from typing import List
 from .ContestProblem import ContestProblem
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Contest:
     """! A Polytope contest dataclass."""
 

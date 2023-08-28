@@ -5,7 +5,7 @@ from .ProblemCheckerTest import ProblemCheckerTest
 from .SourceCode import SourceCode
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ProblemChecker:
     """! A problem's checker dataclass."""
 

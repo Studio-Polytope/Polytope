@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from .Problem import Problem
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ContestProblem:
     """! A Polytope contest's problem dataclass."""
 

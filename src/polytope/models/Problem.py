@@ -8,7 +8,7 @@ from .ProblemTest import ProblemPublicTest, ProblemTest
 from .ProblemSolution import ProblemSolution
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Problem:
     """! A Polytope problem dataclass."""
 

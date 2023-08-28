@@ -5,7 +5,7 @@ from .ProblemValidatorTest import ProblemValidatorTest
 from .SourceCode import SourceCode
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ProblemValidator:
     """! A problem's validator dataclass."""
 

@@ -15,7 +15,7 @@ class ProblemSolutionType(Enum):
     Incorrect = auto()
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ProblemSolution:
     """! A problem's solution dataclass."""
 

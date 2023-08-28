@@ -15,7 +15,7 @@ class SourceCodeLanguage(Enum):
     Python3 = auto()
 
 
-@dataclass
+@dataclass(kw_only=True)
 class SourceCode:
     """! A source code dataclass."""
 
