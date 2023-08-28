@@ -7,8 +7,8 @@ from .SourceCode import SourceCode
 class ProblemSolutionType(Enum):
     """! Types of problem solutions enumeration class."""
 
-    # Main model correct.
-    ModelCorrect = auto()
+    # Main correct (model solution).
+    MainCorrect = auto()
     # Correct.
     Correct = auto()
     # Incorrect.
