@@ -13,6 +13,8 @@ class ProblemCheckerVerdict(Enum):
     PresentationError = auto()
     # Checker crashes.
     Crashed = auto()
+    # Unsupported verdict or behavior.
+    UnsupportedResult = auto()
 
 
 @dataclass(kw_only=True)
