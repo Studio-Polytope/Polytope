@@ -1,6 +1,6 @@
 from requests.structures import CaseInsensitiveDict
 from typing import Any, Callable, cast, Dict, List, Optional, Protocol
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from polytope.github.RequestVerb import RequestVerb
 
 import requests
@@ -38,7 +38,7 @@ class Session(ABC):
         ...
 
     @abstractproperty
-    def headers(self):
+    def headers(self) -> Any:
         ...
 
     @headers.setter
@@ -99,7 +99,7 @@ class MockSession(Session):
         """
 
         log_entry: MockSession.LogEntry = self.LogEntry(
-            verb, url, result=None, **kwargs
+            verb, url, result=None, kwargs=kwargs
         )
         self._logs.append(log_entry)
 
@@ -121,10 +121,10 @@ class MockSession(Session):
         url: str
 
         #: A response result.
-        result: Optional[requests.Response]
+        result: Optional[requests.Response] = None
 
         #: Additional arguments for requesting.
-        kwargs: Dict[str, Any]
+        kwargs: Dict[str, Any] = field(default_factory=dict)
 
         def __repr__(self) -> str:
             return (
