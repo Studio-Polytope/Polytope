@@ -72,9 +72,9 @@ class MockSession(Session):
         Args:
             inject_method (Optional[RequestCallable]):
                 A request method to inject.
-                If None, then use the default request method instead,
-                which always returns None and does nothing.
-                (default is None)
+                If `None`, then use the default request method instead,
+                which always returns `None` and does nothing.
+                (Default is `None`.)
         """
 
         if inject_method is None:
@@ -116,13 +116,10 @@ class MockSession(Session):
 
         #: A HTTPS verb.
         verb: RequestVerb
-
         #: A full-path URL.
         url: str
-
         #: A response result.
         result: Optional[requests.Response] = None
-
         #: Additional arguments for requesting.
         kwargs: Dict[str, Any] = field(default_factory=dict)
 
