@@ -1,7 +1,7 @@
 from enum import Enum, auto
 
 
-# TODO(TAMREF): elaborate the reason of failure, referring to github error message.
+# TODO(TAMREF): Elaborate the reason of failure, referring to GitHub error message.
 class GithubRepositoryInternalCode(Enum):
     """Internal status code of Github CRUD requests."""
 
