@@ -1,6 +1,7 @@
 import json
 from dataclasses import asdict
 from typing import Optional, Tuple, Type
+from typing_extensions import assert_type
 
 import re
 import requests
@@ -16,21 +17,18 @@ from .RepositoryConfig import GithubRepositoryConfig
 from .Response import GithubRepositoryResponse
 
 
-# alphanumeric or hyphen, starts & ends with alphanumeric
-GITHUB_USERNAME_REGEX = (
-    r"^[a-zA-Z\d](?:[a-zA-Z\d]|-(?=[a-zA-Z\d])){0,37}[a-zA-Z\d]$"
-)
-# alphanumeric, hyphen, underscore. starts & ends with alphanumeric.
+# Alphanumeric or hyphen, starts & ends with alphanumeric
+GITHUB_USERNAME_REGEX = r"^[a-zA-Z\d](?:[a-zA-Z\d]|-(?=[a-zA-Z\d])){0,37}[a-zA-Z\d]$"
+# Alphanumeric, hyphen, underscore. starts & ends with alphanumeric.
 GITHUB_REPONAME_REGEX = r"^[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?$"
 
 
 class GithubRepository:
-    """! Controller of Github Repository.
+    """Control a GitHub Repository.
 
-    @param owner        Github Username of Repository Owner.
-    @param name         Name of the repository.
-    @param token        Personal Access Token.
-    @param session      type of session.
+    Attributes:
+        owner (str): Github Username of Repository Owner.
+        config (GithubRepositoryConfig): Repository configurations.
     """
 
     def __init__(
@@ -40,12 +38,20 @@ class GithubRepository:
         token: Token,
         session_cls: Type[Session] = RequestsSession,
     ) -> None:
+        """Initialize the instance.
+
+        Args:
+            owner (str): Github Username of Repository Owner.
+            name (str): Name of the repository.
+            token (Token): Personal Access Token.
+            session_cls: Type of session.
+        """
         assert 0 < len(owner)
         assert is_valid_github_user_name(owner)
         assert 0 < len(name)
         assert is_valid_github_repository_name(name)
 
-        self._requester = Requester(
+        self._requester: Requester = Requester(
             token=token,
             base_url="https://api.github.com",
             headers={
@@ -61,26 +67,28 @@ class GithubRepository:
 
     @property
     def create_url(self) -> str:
-        """! URL for repository creation."""
+        """URL for repository creation."""
         return "/repos/Studio-Polytope/Polytope-repository-template/generate"
 
     def create(
         self, description: str = "", private: bool = True
     ) -> GithubRepositoryResponse:
-        """! Create a repository using our template repository.
+        """Create a repository using our template repository.
 
-        Template repository [(click)](https://github.com/Studio-Polytope/Polytope-repository-template).
+        See the template repository at
+        https://github.com/Studio-Polytope/Polytope-repository-template
 
-        @param description: short repository description.
-        @param private: true if repository needs to be kept private.
+        Args:
+            description (str, optional): Short repository description.
+            private (bool): `True` if repository needs to be kept private. (Default is `True`.)
         """
-        api_url = self.create_url
+        api_url: str = self.create_url
         data = {
             "owner": self.owner,
             "name": self.config.name,
             "description": description,
             "private": private,
-            "include_all_branches": False,  # constantly kept false to protect template
+            "include_all_branches": False,  # Constantly kept false to protect template
         }
 
         result = self._requester.request(
@@ -104,15 +112,23 @@ class GithubRepository:
     def create_without_template(
         self, config: Optional[GithubRepositoryConfig] = None
     ) -> GithubRepositoryResponse:
-        """! Create a github repository. Not a first option to consider.
+        """Create a github repository.
 
-        Wraps [REST API for Github Repository](https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#create-a-repository-for-the-authenticated-user)
-        @param config: overrides default configuration for repository. Cannot modify name here.
+        Not a first option to consider.
+
+        Wrap REST API for Github Repository. See details at
+        https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#create-a-repository-for-the-authenticated-user
+
+        Args:
+            config (optional): Override default configuration for repository. Cannot modify name here.
         """
         if config is None:
             config = self.config
 
         valid_config, validation_msg = config.validate()
+        assert_type(valid_config, bool)
+        assert_type(validation_msg, str)
+
         if not valid_config:
             return GithubRepositoryResponse(
                 status_code=None,
@@ -153,16 +169,14 @@ class GithubRepository:
 
     @property
     def get_url(self) -> str:
-        """! URL to get repository info."""
+        """URL to get repository info."""
         return f"/repos/{self.owner}/{self.config.name}"
 
     def get(self) -> GithubRepositoryResponse:
-        """! Get a repository named {owner}/{repo}."""
-        result = self._requester.request(
-            verb=RequestVerb.GET, api_url=self.get_url
-        )
+        """Get a repository named {owner}/{repo}."""
+        result = self._requester.request(verb=RequestVerb.GET, api_url=self.get_url)
 
-        # @todo define content to read
+        # TODO(TAMREF): Define content to read
 
         if result.status_code == 200:
             return GithubRepositoryResponse(
@@ -176,19 +190,22 @@ class GithubRepository:
 
     @property
     def update_url(self) -> str:
-        """! URL for update."""
+        """URL for update."""
         return f"/repos/{self.owner}/{self.config.name}"
 
     def update(
         self, config: Optional[GithubRepositoryConfig] = None
     ) -> GithubRepositoryResponse:
-        """
-        Update repository by config.
+        """Update repository by `config`.
 
-        @param config: GithubRepositoryConfig class. Includes name.
+        Args:
+            config: GithubRepositoryConfig class. Includes name.
         """
 
         has_polytope_config_file, reason = self.fetch_polytope_config_file()
+        assert_type(has_polytope_config_file, bool)
+        assert_type(reason, str)
+
         if not has_polytope_config_file:
             return GithubRepositoryResponse(
                 status_code=None,
@@ -201,6 +218,9 @@ class GithubRepository:
             config = self.config
 
         valid_config, validation_result = config.validate()
+        assert_type(valid_config, bool)
+        assert_type(validation_result, str)
+
         if not valid_config:
             return GithubRepositoryResponse(
                 status_code=None,
@@ -217,7 +237,7 @@ class GithubRepository:
             data=json.dumps(data),
         )
 
-        # succeeded to update.
+        # Succeeded to update.
         if result.status_code == 200:
             # Update local config only if update is succeeded.
             self.config = config
@@ -232,12 +252,15 @@ class GithubRepository:
 
     @property
     def delete_url(self) -> str:
-        """! URL for delete."""
+        """URL for delete."""
         return f"/repos/{self.owner}/{self.config.name}"
 
     def delete(self) -> GithubRepositoryResponse:
-        """! Delete the repository."""
+        """Delete the repository."""
         has_polytope_config_file, reason = self.fetch_polytope_config_file()
+        assert_type(has_polytope_config_file, bool)
+        assert_type(reason, str)
+
         if not has_polytope_config_file:
             return GithubRepositoryResponse(
                 status_code=None,
@@ -250,7 +273,7 @@ class GithubRepository:
             verb=RequestVerb.DELETE, api_url=self.delete_url
         )
 
-        # succeeded to update.
+        # Succeeded to update.
         if result.status_code == 204:
             return GithubRepositoryResponse(
                 status_code=result.status_code,
@@ -263,17 +286,22 @@ class GithubRepository:
 
     @property
     def fetch_contents_url(self) -> str:
-        """! URL to fetch contents."""
+        """URL to fetch contents."""
         return f"/repos/{self.owner}/{self.config.name}/contents"
 
-    # fetch Polytope config file (polytope.yaml)
+    # Fetch Polytope config file (polytope.yaml)
     def fetch_polytope_config_file(
         self, ignore_cache: bool = False
     ) -> Tuple[bool, str]:
-        """
-        Fetch Polytope config file (currently polytope.yaml).
+        """Fetch Polytope config file (currently `polytope.yaml`).
 
-        @param ignore_cache: If set to False, use cached value instead of sending requests.
+        Args:
+            ignore_cache: If set to `False`, use cached value instead of sending requests.
+
+        Returns:
+            tuple: A tuple containing:
+                * (bool): Existence of Polytope config file.
+                * (str): Reason message.
         """
 
         # believe cached result
@@ -313,7 +341,7 @@ def is_valid_github_user_name(name: str) -> bool:
 def fetch_message_and_errors(
     result: requests.Response,
 ) -> Tuple[str, str] | Tuple[None, None]:
-    """! post-processor of erroneous request.Response."""
+    """Post-processor of erroneous request.Response."""
     if not result.content:
         return None, None
 
@@ -332,15 +360,20 @@ def fetch_message_and_errors(
 def parse_polytope_config_file(
     resp_content: str | bytes | bytearray | None,
 ) -> Tuple[bool, str]:
-    """! Parse http response content from Github root directory.
+    """Parse http response content from Github root directory.
 
-    @param resp_content: content of http response.
-    @return (if there is a Polytope config file, error msg while finding configs)
+    Args:
+        resp_content: Content of http response.
+
+    Returns:
+        tuple: A tuple containing:
+            * (bool): Whether if there is a Polytope config file.
+            * (str): Error message while finding configs.
     """
     if not resp_content:
         return False, "empty response content"
 
-    # @todo error handling while json unmarshal
+    # TODO(TAMREF): Error handling while json unmarshal
     contents = json.loads(resp_content)
 
     if not isinstance(contents, list):
