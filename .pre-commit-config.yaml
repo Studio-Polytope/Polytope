@@ -33,6 +33,7 @@ repos:
         additional_dependencies: [tokenize-rt==5.2.0, types-requests]
         exclude: ^test/
         args: [
+            --python-version=3.10,
             --ignore-missing-imports,
             --disallow-any-unimported,
             --no-implicit-optional,
