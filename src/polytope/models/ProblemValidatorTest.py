@@ -9,6 +9,10 @@ class ProblemValidatorVerdict(Enum):
     Valid = auto()
     # Input is invalid.
     Invalid = auto()
+    # Validator crashes.
+    Crashed = auto()
+    # Unsupported verdict or behavior.
+    UnsupportedResult = auto()
 
 
 @dataclass(kw_only=True)
