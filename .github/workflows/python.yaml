@@ -34,6 +34,16 @@ jobs:
       - name: Install Polytope
         run: |
           pip install .
+      - name: Static type check with mypy
+        run: |
+          mypy src/ \
+            --ignore-missing-imports \
+            --disallow-any-unimported \
+            --no-implicit-optional \
+            --check-untyped-defs \
+            --warn-return-any \
+            --warn-unused-ignores \
+            --show-error-codes
       - name: Test with pytest
         run: |
           python -m pytest
