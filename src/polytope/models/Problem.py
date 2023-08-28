@@ -45,7 +45,7 @@ class Problem:
     """! Problem tags.
 
     * Tags must be distinct.
-    * A tag must be non-empty.
+    * Each tag must be non-empty.
     """
     tags: List[str]
 
