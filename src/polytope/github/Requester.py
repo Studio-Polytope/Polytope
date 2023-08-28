@@ -1,13 +1,10 @@
-from typing import TYPE_CHECKING, Type, Optional, Dict
+from typing import Type, Optional, Dict
 
 import requests
 from polytope.github.RequestVerb import RequestVerb
 
 from polytope.github.Session import RequestsSession, Session
-
-"""This clause is only processed by mypy."""
-if TYPE_CHECKING:
-    from .Token import Token
+from polytope.github.Token import Token
 
 
 class Requester:
@@ -15,7 +12,7 @@ class Requester:
 
     def __init__(
         self,
-        token: "Token",
+        token: Token,
         base_url: str,
         SessionClass: Type[Session] = RequestsSession,
         headers: Optional[Dict[str, str]] = None,
@@ -29,7 +26,7 @@ class Requester:
         """
         assert 0 < len(base_url)
 
-        self._token: "Token" = token
+        self._token: Token = token
         self._base_url: str = base_url
 
         self._session: Session = SessionClass()

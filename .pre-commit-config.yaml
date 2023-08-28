@@ -11,7 +11,7 @@ repos:
     rev: 23.7.0
     hooks:
     -   id: black
-        exclude: test/
+        exclude: ^test/
 -   repo: https://github.com/PyCQA/flake8
     rev: 6.1.0
     hooks:
@@ -24,5 +24,21 @@ repos:
             'flake8-implicit-str-concat',
             'pydocstyle>=5.0.0',
         ]
-        exclude: test/
+        exclude: ^test/
         args: ['--ignore=D100,D102,D103,D104,D105,D106,D107,D202,E501,W503']
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.5.1
+    hooks:
+    -   id: mypy
+        additional_dependencies: [tokenize-rt==5.2.0, types-requests]
+        exclude: ^test/
+        args: [
+            --python-version=3.10,
+            --ignore-missing-imports,
+            --disallow-any-unimported,
+            --no-implicit-optional,
+            --check-untyped-defs,
+            --warn-return-any,
+            --warn-unused-ignores,
+            --show-error-codes,
+        ]

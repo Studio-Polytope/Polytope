@@ -2,9 +2,7 @@ from requests.structures import CaseInsensitiveDict
 from typing import Callable, List, Optional, Protocol
 from polytope.github.RequestVerb import RequestVerb
 
-
 import requests
-
 
 from abc import ABC, abstractmethod, abstractproperty
 
