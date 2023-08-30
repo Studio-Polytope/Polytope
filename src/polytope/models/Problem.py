@@ -46,8 +46,12 @@ class Problem:
     """
     tags: List[str]
 
-    """! Problem owner."""
-    owner: str
+    """! Problem owners.
+
+    * Owners must be distinct.
+    * Each owner must be non-empty.
+    """
+    owners: List[str]
 
     """! Problem statements."""
     statements: List[ProblemStatement] = field(default_factory=list)
