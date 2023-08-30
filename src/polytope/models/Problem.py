@@ -36,7 +36,8 @@ class Problem:
 
     """! Memory limit in mebibytes.
 
-    * It must be positive."""
+    * It must be positive.
+    """
     memory_limit_in_mib: int
 
     """! Problem tags.
