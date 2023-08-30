@@ -64,6 +64,8 @@ class PolytopeUUID:
             raise ValueError("count must be non-negative.")
         if 0 == count:
             return []
+        if 1 == count:
+            return [self.uuid()]
 
         # 0.01 * (|alphabet| ** length) < count
         if math.log(count) - self.length * math.log(
