@@ -102,10 +102,11 @@ class PolytopeUUID:
 
         uuid_list: List[str] = []
         for num in num_list:
-            uuid = ""
+            char_list: List[str] = []
             for _ in range(self.length):
-                uuid += self.alphabet[num % len(self.alphabet)]
+                char_list.append(self.alphabet[num % len(self.alphabet)])
                 num //= len(self.alphabet)
+            uuid = "".join(char_list)
             uuid_list.append(uuid)
 
         return uuid_list
