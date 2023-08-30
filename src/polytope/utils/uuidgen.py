@@ -95,15 +95,17 @@ class PolytopeUUID:
 
         # generate distinct integers in range [0, total)
         num_list: List[int] = []
-        index: Dict[int, int] = {}
+        replacement: Dict[int, int] = {}
+
+        def index(i: int) -> int:
+            return replacement.get(i) or i
+
         for i in range(count):
-            rnd = random.randrange(0, total - i)
-            num_list.append(rnd if rnd not in index else index[rnd])
-            if rnd != total - i - 1:
-                if total - i - 1 not in index:
-                    index[rnd] = total - i - 1
-                else:
-                    index[rnd] = index[total - i - 1]
+            max_value: int = total - i - 1
+            rnd = random.randrange(0, max_value + 1)
+            num_list.append(index(rnd))
+            if rnd != max_value:
+                replacement[rnd] = index(max_value)
 
         uuid_list: List[str] = []
         for num in num_list:
