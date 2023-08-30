@@ -19,15 +19,8 @@ class PolytopeUUID:
         @param alphabet     alphabet for generating uuid
         @param length       length of uuid
         """
-        if len(alphabet) == 0:
-            raise ValueError("alphabet must be a non-empty string.")
-        if len(set(alphabet)) != len(alphabet):
-            raise ValueError("alphabet must consist of distinct characters.")
-        if length <= 0:
-            raise ValueError("length must be positive.")
-
-        self._alphabet = alphabet
-        self._length = length
+        self.alphabet = alphabet
+        self.length = length
 
     @property
     def alphabet(self) -> str:
@@ -37,8 +30,8 @@ class PolytopeUUID:
     @alphabet.setter
     def alphabet(self, value: str) -> None:
         """! A setter method for alphabet property."""
-        if len(value) == 0:
-            raise ValueError("alphabet must be a non-empty string.")
+        if len(value) < 2:
+            raise ValueError("alphabet must be long enough.")
         if len(set(value)) != len(value):
             raise ValueError("alphabet must consist of distinct characters.")
 
