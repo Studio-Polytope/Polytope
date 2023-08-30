@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import Dict, List
 
 from .ProblemStatement import ProblemStatement
 from .ProblemChecker import ProblemChecker
@@ -54,8 +54,11 @@ class Problem:
     """
     owners: List[str]
 
-    """! Problem statements."""
-    statements: List[ProblemStatement] = field(default_factory=list)
+    """! Problem statements.
+
+    * Key is `ProblemStatment.lang`.
+    """
+    statements: Dict[str, ProblemStatement] = field(default_factory=dict)
 
     """! Problem checker."""
     checker: ProblemChecker
