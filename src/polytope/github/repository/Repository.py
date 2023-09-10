@@ -17,7 +17,9 @@ from .Response import GithubRepositoryResponse
 
 
 # alphanumeric or hyphen, starts & ends with alphanumeric
-GITHUB_USERNAME_REGEX = r"^[a-zA-Z\d](?:[a-zA-Z\d]|-(?=[a-zA-Z\d])){0,37}[a-zA-Z\d]$"
+GITHUB_USERNAME_REGEX = (
+    r"^[a-zA-Z\d](?:[a-zA-Z\d]|-(?=[a-zA-Z\d])){0,37}[a-zA-Z\d]$"
+)
 # alphanumeric, hyphen, underscore. starts & ends with alphanumeric.
 GITHUB_REPONAME_REGEX = r"^[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?$"
 
@@ -156,7 +158,9 @@ class GithubRepository:
 
     def get(self) -> GithubRepositoryResponse:
         """! Get a repository named {owner}/{repo}."""
-        result = self._requester.request(verb=RequestVerb.GET, api_url=self.get_url)
+        result = self._requester.request(
+            verb=RequestVerb.GET, api_url=self.get_url
+        )
 
         # @todo define content to read
 
@@ -208,7 +212,9 @@ class GithubRepository:
         data = asdict(config)
 
         result = self._requester.request(
-            verb=RequestVerb.PATCH, api_url=self.update_url, data=json.dumps(data)
+            verb=RequestVerb.PATCH,
+            api_url=self.update_url,
+            data=json.dumps(data),
         )
 
         # succeeded to update.
@@ -282,9 +288,10 @@ class GithubRepository:
         )
 
         if result.status_code == 200:
-            self._has_polytope_config_file, reason = parse_polytope_config_file(
-                result.content
-            )
+            (
+                self._has_polytope_config_file,
+                reason,
+            ) = parse_polytope_config_file(result.content)
             return self._has_polytope_config_file, reason
 
         else:
