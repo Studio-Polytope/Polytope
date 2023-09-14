@@ -8,7 +8,13 @@ from polytope.github.Token import Token
 
 
 class Requester:
-    """! API request wrapper class."""
+    """Wrap API requests.
+
+    Attributes:
+        session (Session):
+            Used for API requests.
+            Authorization and some other given headers are injected.
+    """
 
     def __init__(
         self,
@@ -16,13 +22,14 @@ class Requester:
         base_url: str,
         SessionClass: Type[Session] = RequestsSession,
         headers: Optional[Dict[str, str]] = None,
-    ):
-        """! Requester class initializer.
+    ) -> None:
+        """Initialize the instance.
 
-        @param token            A token for authorization.
-        @param base_url         A base URL of API.
-        @param SessionClass     A class to use for a session.
-        @param headers          Additional headers other than Authorization to fix in session.
+        Args:
+            token (Token): A token for authorization.
+            base_url (str): A non-empty base URL of API.
+            SessionClass: A class to use for a session.
+            headers (Dict[str, str], optional): Additional headers other than Authorization to fix in session.
         """
         assert 0 < len(base_url)
 
@@ -44,13 +51,15 @@ class Requester:
         api_url: str,
         **kwargs,
     ) -> requests.Response:
-        """! API request wrapper with token authorization.
+        """Wrap an API request with token authorization.
 
-        @param verb     A HTTPS verb.
-        @param api_url  A relative URL of API starting with '/'.
-        @param **kwargs Additional arguments for requesting.
+        Args:
+            verb (RequestVerb): A HTTPS verb.
+            api_url (str): A non-empty relative URL of API starting with '/'.
+            **kwargs: Additional arguments for requesting.
 
-        @return  A response.
+        Returns:
+            A response.
         """
         assert 0 < len(api_url)
         assert "/" == api_url[0]
@@ -59,5 +68,5 @@ class Requester:
         return self._session.request(verb, url, **kwargs)
 
     @property
-    def session(self):
+    def session(self) -> Session:
         return self._session

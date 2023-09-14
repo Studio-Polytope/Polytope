@@ -1,5 +1,6 @@
 from requests.structures import CaseInsensitiveDict
-from typing import Callable, List, Optional, Protocol
+from typing import Any, Callable, cast, Dict, List, Optional, Protocol
+from dataclasses import dataclass, field
 from polytope.github.RequestVerb import RequestVerb
 
 import requests
@@ -7,57 +8,78 @@ import requests
 from abc import ABC, abstractmethod, abstractproperty
 
 
-class Session(ABC):
-    """! A request session class."""
+class RequestCallable(Protocol):
+    """The request method protocol."""
 
-    @abstractmethod
-    def request(
+    def __call__(
         self,
         verb: RequestVerb,
         url: str,
         **kwargs,
     ) -> requests.Response:
-        """! Request method with token authorization.
+        """Request given verb with token authorization.
 
-        This method might be wrapped or injected.
-        @param verb     A HTTPS verb.
-        @param url      A full-path URL.
-        @param **kwargs Additional arguments for requesting.
-        @return  A response.
+        Args:
+            verb (RequestVerb): A HTTPS verb.
+            url (str): A full-path URL.
+            **kwargs: Additional arguments for requesting.
+
+        Returns:
+            A response.
         """
         ...
 
+
+class Session(ABC):
+    """The request session interface."""
+
     @abstractproperty
-    def headers(self):
+    def request(self) -> RequestCallable:
+        ...
+
+    @abstractproperty
+    def headers(self) -> Any:
         ...
 
     @headers.setter
     @abstractmethod
-    def headers(self, value):
+    def headers(self, value) -> None:
         ...
 
 
 class MockSession(Session):
-    """! A mock session class for testing."""
+    """Mock the session class for testing.
 
-    def __init__(self):
-        """! MockSession class initializer."""
+    Attributes:
+        logs (List[MockSession.LogEntry]):
+            A log list containing the argument values
+            in order when the request method is called.
+    """
+
+    def __init__(self) -> None:
         self._logs: List[MockSession.LogEntry] = []
         self._headers: CaseInsensitiveDict = CaseInsensitiveDict()
         self.inject_request()
 
     def inject_request(
         self,
-        inject_method: Optional["MockSession.RequestMethodCallable"] = None,
-    ):
-        """! Inject a request method.
+        inject_method: Optional[RequestCallable] = None,
+    ) -> None:
+        """Inject the given request method.
 
-        @param inject_method    A request method to inject.
+        Overwrite the injected method which is used for request.
+
+        Args:
+            inject_method (Optional[RequestCallable]):
+                A request method to inject.
+                If `None`, then use the default request method instead,
+                which always returns `None` and does nothing.
+                (Default is `None`.)
         """
 
         if inject_method is None:
-            inject_method = self.__default_request
-        self._inject_method = inject_method
+            inject_method = cast(RequestCallable, self.__default_request)
+        self._inject_method: RequestCallable = inject_method
 
     def request(
         self,
@@ -65,59 +87,43 @@ class MockSession(Session):
         url: str,
         **kwargs,
     ) -> requests.Response:
-        """! Request using injected method.
+        """Request using the injected method.
 
-        @param verb     A HTTPS verb.
-        @param url      A full-path URL.
-        @param **kwargs Additional arguments for requesting.
-        @return  A response.
+        Args:
+            verb (RequestVerb): A HTTPS verb.
+            url (str): A full-path URL.
+            **kwargs: Additional arguments for requesting.
+
+        Returns:
+            A response.
         """
 
-        log_entry = self.LogEntry(verb, url, result=None, **kwargs)
+        log_entry: MockSession.LogEntry = self.LogEntry(
+            verb, url, result=None, kwargs=kwargs
+        )
         self._logs.append(log_entry)
 
-        response = self._inject_method(verb, url, **kwargs)
+        response: requests.Response = self._inject_method(verb, url, **kwargs)
         log_entry.result = response
         return response
 
     def __default_request(self, *args, **kwargs) -> requests.Response:
         return requests.Response()
 
-    class RequestMethodCallable(Protocol):
-        """! A protocol for request method injection."""
-
-        def __call__(
-            self,
-            verb: RequestVerb,
-            url: str,
-            **kwargs,
-        ) -> requests.Response:
-            ...
-
+    @dataclass()
     class LogEntry:
-        """! Logging entry class."""
+        """Log arguments and return value of the request method."""
 
-        def __init__(
-            self,
-            verb: RequestVerb,
-            url: str,
-            result: Optional[requests.Response],
-            **kwargs,
-        ):
-            """! LogEntry class initializer.
+        #: A HTTPS verb.
+        verb: RequestVerb
+        #: A full-path URL.
+        url: str
+        #: A response result.
+        result: Optional[requests.Response] = None
+        #: Additional arguments for requesting.
+        kwargs: Dict[str, Any] = field(default_factory=dict)
 
-            @param verb     A HTTPS verb.
-            @param url      A full-path URL.
-            @param result   A response result.
-            @param **kwargs Additional arguments for requesting.
-            """
-
-            self.verb = verb
-            self.url = url
-            self.result = result
-            self.kwargs = kwargs
-
-        def __repr__(self):
+        def __repr__(self) -> str:
             return (
                 f"verb = {self.verb}, "
                 f"url = '{self.url}', "
@@ -126,23 +132,22 @@ class MockSession(Session):
             )
 
     @property
-    def headers(self):
+    def headers(self) -> CaseInsensitiveDict:
         return self._headers
 
     @headers.setter
-    def headers(self, value):
+    def headers(self, value: CaseInsensitiveDict) -> None:
         self._headers = value
 
     @property
-    def logs(self):
+    def logs(self) -> List[LogEntry]:
         return self._logs
 
 
 class RequestsSession(Session):
-    """! A session class with requests session."""
+    """The session with requests module."""
 
     def __init__(self):
-        """! RequestsSession class initializer."""
         self._session: requests.Session = requests.Session()
 
     def request(
@@ -151,15 +156,18 @@ class RequestsSession(Session):
         url: str,
         **kwargs,
     ) -> requests.Response:
-        """! Request method with token authorization.
+        """Request given verb with token authorization.
 
-        This method might be wrapped or injected.
-        @param verb     A HTTPS verb.
-        @param url      A full-path URL.
-        @param **kwargs Additional arguments for requesting.
-        @return  A response.
+        Args:
+            verb (RequestVerb): A HTTPS verb.
+            url (str): A full-path URL.
+            **kwargs: Additional arguments for requesting.
+
+        Returns:
+            A response.
         """
 
+        # Supported verbs.
         assert verb in [
             RequestVerb.GET,
             RequestVerb.HEAD,
@@ -179,5 +187,5 @@ class RequestsSession(Session):
         return self._session.headers
 
     @headers.setter
-    def headers(self, value):
+    def headers(self, value) -> None:
         self._session.headers = value

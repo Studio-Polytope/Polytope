@@ -7,10 +7,10 @@ from .SourceCode import SourceCode
 
 @dataclass(kw_only=True)
 class ProblemValidator:
-    """! A problem's validator dataclass."""
+    """A problem's validator."""
 
-    """! Validator source code."""
+    #: Validator source code.
     code: Optional[SourceCode] = None
 
-    """! Validator test scenarios."""
+    #: Validator test scenarios.
     tests: List[ProblemValidatorTest] = field(default_factory=list)

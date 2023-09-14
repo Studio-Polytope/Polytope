@@ -6,10 +6,9 @@ from .ContestProblem import ContestProblem
 
 @dataclass(kw_only=True)
 class Contest:
-    """! A Polytope contest dataclass."""
+    """A Polytope contest."""
 
-    """! Contest name."""
+    #: Contest name.
     name: str
-
-    """! Contest problems."""
+    #: Contest problems.
     problems: List[ContestProblem] = field(default_factory=list)

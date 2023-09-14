@@ -4,7 +4,7 @@ from typing import Tuple
 
 @dataclass
 class GithubRepositoryConfig:
-    """! Wraps Configurations of Github Repository, managable by API."""
+    """Wrap Configurations of Github Repository, managable by API."""
 
     name: str
     description: str = ""
@@ -30,11 +30,11 @@ class GithubRepositoryConfig:
     is_template: bool = False
 
     def validate(self) -> Tuple[bool, str]:
-        # @todo adopt github's own validation rules in advance
+        # TODO(TAMREF): Adopt Github's own validation rules in advance
         if len(self.name) == 0:
             return False, "name should be non-empty"
 
-        # validate squash commit combo
+        # Validate squash commit combo
         squash_commit_combo = (
             self.squash_merge_commit_title,
             self.squash_merge_commit_message,
