@@ -2,34 +2,33 @@ import random
 import math
 from typing import List
 
-# collision probability in 150,000 entries ~ 1%
-# lowercase alphabet + digit except [l, 1, o, 0]
+# Collision probability in 150,000 entries ~ 1%
+# Lowercase alphabet + digit except [l, 1, o, 0]
 DEFAULT_ALPHABET = "abcdefghijkmnpqrstuvwxyz23456789"
 DEFAULT_LENGTH = 8
 
 
 class PolytopeUUID:
-    """UUID generator class."""
+    """UUID generator."""
 
     def __init__(
         self, alphabet: str = DEFAULT_ALPHABET, length: int = DEFAULT_LENGTH
     ) -> None:
-        """! PolytopeUUID class initializer.
+        """Initialize the instance.
 
-        @param alphabet     alphabet for generating uuid
-        @param length       length of uuid
+        Args:
+            alphabet (str): Alphabets for generating uuid.
+            length (int): Length of uuid.
         """
         self.alphabet = alphabet
         self.length = length
 
     @property
     def alphabet(self) -> str:
-        """! An alphabet property for generating uuid."""
         return self._alphabet
 
     @alphabet.setter
     def alphabet(self, value: str) -> None:
-        """! A setter method for alphabet property."""
         if len(value) < 10:
             raise ValueError("alphabet must be long enough.")
         if len(set(value)) != len(value):
@@ -39,26 +38,25 @@ class PolytopeUUID:
 
     @property
     def length(self) -> int:
-        """! A length property of uuid."""
         return self._length
 
     @length.setter
     def length(self, value: int) -> None:
-        """! A setter method for length property."""
         if value < 5:
             raise ValueError("length must be large enough.")
 
         self._length = value
 
     def uuid(self) -> str:
-        """! A method for generating uuid."""
+        """Generate uuid."""
         char_list = [random.choice(self.alphabet) for _ in range(self.length)]
         return "".join(char_list)
 
     def uuid_bulk(self, count: int) -> List[str]:
-        """! A method for bulk generating a list of distinct uuids.
+        """Bulk-generate a list of distinct uuids.
 
-        @param count    number of uuids to generate
+        Args:
+            count (int): The number of uuids to generate.
         """
         if count < 0:
             raise ValueError("count must be non-negative.")

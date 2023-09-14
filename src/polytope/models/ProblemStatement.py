@@ -3,10 +3,10 @@ from dataclasses import dataclass
 
 @dataclass(kw_only=True)
 class ProblemStatement:
-    """! A problem statement dataclass."""
+    """A problem statement."""
 
-    """! Statement language."""
+    #: Statement language.
     lang: str
 
-    """! Statement context."""
+    #: Statement context.
     context: str

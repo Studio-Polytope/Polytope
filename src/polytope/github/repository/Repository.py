@@ -18,7 +18,9 @@ from .Response import GithubRepositoryResponse
 
 
 # Alphanumeric or hyphen, starts & ends with alphanumeric
-GITHUB_USERNAME_REGEX = r"^[a-zA-Z\d](?:[a-zA-Z\d]|-(?=[a-zA-Z\d])){0,37}[a-zA-Z\d]$"
+GITHUB_USERNAME_REGEX = (
+    r"^[a-zA-Z\d](?:[a-zA-Z\d]|-(?=[a-zA-Z\d])){0,37}[a-zA-Z\d]$"
+)
 # Alphanumeric, hyphen, underscore. starts & ends with alphanumeric.
 GITHUB_REPONAME_REGEX = r"^[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?$"
 
@@ -174,7 +176,9 @@ class GithubRepository:
 
     def get(self) -> GithubRepositoryResponse:
         """Get a repository named {owner}/{repo}."""
-        result = self._requester.request(verb=RequestVerb.GET, api_url=self.get_url)
+        result = self._requester.request(
+            verb=RequestVerb.GET, api_url=self.get_url
+        )
 
         # TODO(TAMREF): Define content to read
 

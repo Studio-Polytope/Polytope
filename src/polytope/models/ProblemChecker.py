@@ -7,10 +7,10 @@ from .SourceCode import SourceCode
 
 @dataclass(kw_only=True)
 class ProblemChecker:
-    """! A problem's checker dataclass."""
+    """A problem's checker."""
 
-    """! Checker source code."""
+    #: Checker source code.
     code: Optional[SourceCode] = None
 
-    """! Checker test scenarios."""
+    #: Checker test scenarios.
     tests: List[ProblemCheckerTest] = field(default_factory=list)
